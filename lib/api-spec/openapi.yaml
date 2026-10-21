@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: workforce
+    description: Reference role and labor-market data for AURA-Workforce
 paths:
   /healthz:
     get:
@@ -24,6 +26,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /workforce/roles:
+    get:
+      operationId: listWorkforceRoles
+      tags: [workforce]
+      summary: List future-ready roles and their learning pathways
+      responses:
+        "200":
+          description: Role catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkforceRole"
+  /workforce/signals:
+    get:
+      operationId: listMarketSignals
+      tags: [workforce]
+      summary: List sourced labor-market and skills signals
+      responses:
+        "200":
+          description: Sourced market signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketSignal"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +63,129 @@ components:
           type: string
       required:
         - status
+    LearningModule:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        skill:
+          type: string
+        description:
+          type: string
+        hours:
+          type: integer
+        prerequisites:
+          type: array
+          items:
+            type: string
+        sdgTargets:
+          type: array
+          items:
+            type: string
+        provider:
+          type: string
+        url:
+          type: string
+          format: uri
+        costNote:
+          type: string
+      required:
+        - id
+        - title
+        - skill
+        - description
+        - hours
+        - prerequisites
+        - sdgTargets
+        - provider
+        - url
+        - costNote
+    WorkforceRole:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        sector:
+          type: string
+        summary:
+          type: string
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        transferableSkills:
+          type: array
+          items:
+            type: string
+        sdgTargets:
+          type: array
+          items:
+            type: string
+        outlook:
+          type: string
+        disruptionExposure:
+          type: integer
+        learningPathway:
+          type: array
+          items:
+            $ref: "#/components/schemas/LearningModule"
+      required:
+        - id
+        - title
+        - sector
+        - summary
+        - requiredSkills
+        - transferableSkills
+        - sdgTargets
+        - outlook
+        - disruptionExposure
+        - learningPathway
+    MarketSignal:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+        period:
+          type: string
+        summary:
+          type: string
+        sourceName:
+          type: string
+        sourceUrl:
+          type: string
+          format: uri
+        geography:
+          type: string
+        sourceNote:
+          type: string
+        published:
+          type: string
+        live:
+          type: boolean
+      required:
+        - id
+        - title
+        - category
+        - value
+        - unit
+        - period
+        - summary
+        - sourceName
+        - sourceUrl
+        - geography
+        - sourceNote
+        - published
+        - live
 

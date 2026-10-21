@@ -1,15 +1,16 @@
-# [Project name]
+# AURA-Workforce
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A privacy-first career-transition planner that helps workers and counselors compare future-ready roles, understand transferable skills and gaps, and explore sourced upskilling pathways.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/aura-workforce run typecheck` — typecheck the web app
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+
+The AURA app and workforce reference endpoints do not require a database or user credentials.
 
 ## Stack
 
@@ -22,15 +23,20 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/aura-workforce/` — React/Vite app
+- `artifacts/api-server/src/routes/workforce.ts` — curated role, learning-path, and labor-signal catalog
+- `lib/api-spec/openapi.yaml` — source of truth for API contracts
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Profiles are held only in browser memory; do not persist, upload, or send profile or CV data to the API.
+- Role-fit scoring and disruption scenarios run in the browser; the API only serves non-personal reference data.
+- Labor-market indicators are sourced snapshots, not live feeds; show each source, geography, period, and caveat.
+- Forecasts are directional estimates, not guarantees or individualized employment predictions.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The app supports guided profile intake, transferable-skill matching, moderate/aggressive disruption scenarios, modular learning plans, SDG tags, and source-linked labor-market signals.
 
 ## User preferences
 
@@ -38,7 +44,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- When changing the API contract, regenerate the client and Zod schemas before using new types.
+- Do not describe the curated BLS/WEF snapshot as real-time or Malaysia-specific labor-market data.
 
 ## Pointers
 
