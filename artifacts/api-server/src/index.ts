@@ -1,13 +1,10 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+// The Replit artifact runner supplies PORT when it starts this service. It is
+// defaulted here so the API can also be started from a plain shell, a CI
+// runner, or another host without `PORT=... pnpm dev` every time.
+const rawPort = process.env["PORT"] ?? "8080";
 
 const port = Number(rawPort);
 
