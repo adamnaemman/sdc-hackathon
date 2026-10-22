@@ -19,6 +19,7 @@ type PlanRankingEntry = {
   roleId: string;
   roleTitle: string;
   fit: number;
+  appEstimate: number;
   reason: string;
   gaps: string[];
   sdgTargets: string[];
@@ -170,6 +171,9 @@ export function AiPlanCard({ roles, profile, mode }: AiPlanCardProps) {
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-[11px] font-semibold">{entry.roleTitle}</span>
                   <span className="font-mono-ui text-[13px] font-semibold">{entry.fit}</span>
+                </div>
+                <div className="mt-0.5 text-right font-mono-ui text-[8px] text-muted-foreground">
+                  AI · app estimate {entry.appEstimate}
                 </div>
                 <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">{entry.reason}</p>
                 {entry.gaps.length > 0 ? (

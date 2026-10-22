@@ -64,7 +64,10 @@ export type PlanRole = {
 export type PlanRankingEntry = {
   roleId: string;
   roleTitle: string;
+  /** The model's fit judgement. */
   fit: number;
+  /** The app's deterministic score, shown next to it so any disagreement is visible. */
+  appEstimate: number;
   reason: string;
   gaps: string[];
   sdgTargets: string[];
@@ -126,7 +129,8 @@ Absolute rules:
 - Never invent statistics, salaries, job counts or dates. You may only use numbers that appear in the input (years of experience, weekly hours, module hours).
 - Reasons must cite the person's OWN skills or competencies by name. If they have none in common, say so plainly.
 - Respect prerequisites: a module that depends on another should not be placed first.
-- Fit is an integer 0-100 and must stay within 10 points of the provided deterministic score for that role. If you disagree, express it in the reason, not by ignoring the score.
+- Fit is an integer 0-100 and must reflect THIS person's profile as a whole, including their stated current role, industry and target sectors.
+- The provided deterministic scores are a sanity check computed from skills only. They do not see the person's stated role, industry or goals. If the profile supports a different ordering, follow the profile and explain the disagreement in the reason.
 - Tone: direct, warm, no hype. This person is making a life decision.
 
 Return exactly this shape:
@@ -277,9 +281,11 @@ export async function buildPlan(
       return {
         roleId: role.id,
         roleTitle: role.title,
-        // Keep the model honest: fit may not drift more than 10 points from the
-        // deterministic score the user can already see on the dashboard.
-        fit: clamp(Math.round(entry.fit), prior - 10, prior + 10),
+        // The model now owns the ranking. We keep its number inside a sane
+        // range, and we send the app's own estimate alongside it so the UI can
+        // show where the two disagree instead of hiding it.
+        fit: clamp(Math.round(entry.fit), 15, 98),
+        appEstimate: clamp(Math.round(prior), 0, 100),
         reason: entry.reason.trim().slice(0, 400),
         gaps: entry.gaps.slice(0, 6).map((gap) => gap.trim().slice(0, 80)).filter(Boolean),
         sdgTargets: role.sdgTargets.slice(0, 4),
