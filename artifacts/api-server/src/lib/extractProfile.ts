@@ -21,7 +21,7 @@
  *    prompt-injection attempt cannot do more than pick a few skills.
  */
 
-import { z } from "zod";
+import { z } from "@workspace/api-zod";
 import { logger } from "./logger";
 
 // ---------------------------------------------------------------------------

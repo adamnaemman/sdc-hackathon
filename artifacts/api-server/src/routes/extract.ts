@@ -15,7 +15,7 @@
  */
 
 import { Router, type IRouter } from "express";
-import { z } from "zod";
+import { z } from "@workspace/api-zod";
 import {
   extractProfile,
   ExtractionFailedError,
