@@ -14,15 +14,12 @@ import {
 import { useHealthCheck, useListMarketSignals, useListWorkforceRoles } from '@workspace/api-client-react';
 import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
 import { LiveTrendStrip } from '@/components/live-trend-strip';
+import { AiPlanCard } from '@/components/ai-plan-card';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
+import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
 
 const queryClient = new QueryClient();
 
-type DisruptionMode = 'Moderate' | 'Aggressive';
-type ProfileData = {
-  currentRole: string; industry: string; yearsExperience: number; skills: string[];
-  competencies: string[]; targetSectors: string[]; weeklyHours: number;
-};
 type AppContextValue = {
   roles: WorkforceRole[]; signals: MarketSignal[]; loadingRoles: boolean; loadingSignals: boolean;
   rolesError: boolean; signalsError: boolean; refetchRoles: () => void; refetchSignals: () => void;
@@ -99,38 +96,6 @@ function AppContent() {
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
 
-function scoreRole(role: WorkforceRole, profile: ProfileData, mode: DisruptionMode, demandShare = 0) {
-  const requiredSkills = role.requiredSkills ?? [];
-  const transferableSkills = role.transferableSkills ?? [];
-  const direct = requiredSkills.length ? requiredSkills.filter((skill) => hasProfileSkill(profile, skill)).length / requiredSkills.length : 0;
-  const transferable = transferableSkills.length ? transferableSkills.filter((skill) => hasProfileSkill(profile, skill)).length / transferableSkills.length : 0;
-  const sectorMatch = profile.targetSectors.some((sector) => normalize(role.sector).includes(normalize(sector)) || normalize(sector).includes(normalize(role.sector))) ? 1 : 0;
-  const experienceLift = Math.min(profile.yearsExperience, 15) * .42;
-  const intensity = mode === 'Aggressive' ? Number(role.disruptionExposure || 0) * .19 : Number(role.disruptionExposure || 0) * .08;
-  // Live demand contributes at most 12 points, so it can move a ranking but can
-  // never override a candidate's own skills and goals.
-  const demandLift = Math.max(0, Math.min(1, demandShare)) * 12;
-  return Math.max(38, Math.min(96, Math.round(45 + direct * 25 + transferable * 20 + sectorMatch * 8 + experienceLift + demandLift - intensity)));
-}
-function urgencyFor(role: WorkforceRole, mode: DisruptionMode, profile: ProfileData) {
-  const exposure = Number(role.disruptionExposure || 0);
-  const skillGap = (role.requiredSkills ?? []).filter((skill) => !hasProfileSkill(profile, skill)).length;
-  return Math.max(12, Math.min(92, Math.round(exposure * (mode === 'Aggressive' ? 1.35 : .65) + skillGap * 3)));
-}
-function normalize(value: string) { return value.toLowerCase().replace(/[^a-z0-9]/g, ''); }
-const skillAliases: Record<string, string[]> = {
-  "microsoft excel": ["spreadsheet analysis", "advanced spreadsheet analysis", "data analysis"],
-  "manual po processing": ["procurement", "workflow coordination", "process mapping"],
-  "vendor communication": ["stakeholder communication"],
-  "inventory auditing": ["inventory management"],
-};
-function hasProfileSkill(profile: ProfileData, targetSkill: string) {
-  const expand = (skill: string) => [skill, ...(skillAliases[skill.toLowerCase()] ?? [])].map(normalize);
-  const target = expand(targetSkill);
-  return [...profile.skills, ...profile.competencies].some((skill) =>
-    expand(skill).some((mine) => target.some((wanted) => mine === wanted || mine.includes(wanted) || wanted.includes(mine))),
-  );
-}
 function outlookMetric(role: WorkforceRole) {
   if (role.outlook.includes("12%")) return { value: "12%", caption: "projected growth · U.S. BLS" };
   if (role.outlook.startsWith("Emerging")) return { value: "Emerging", caption: "demand varies by employer" };
@@ -265,7 +230,7 @@ function RoleCard({ role, profile, rank, score, urgency, onSelect }: { role: Wor
 }
 
 function ProfilePage() {
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, roles, mode } = useApp();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState(profile);
   const [saved, setSaved] = useState(false);
@@ -309,6 +274,7 @@ function ProfilePage() {
         </div>
       </Card>
     </div>
+    <AiPlanCard roles={roles} profile={draft} mode={mode}/>
   </div>;
 }
 function Field({ label, hint, children }: { label: string; hint: string; children: ReactNode }) { return <label className="block"><span className="text-[11px] font-semibold">{label}</span><span className="mt-1 block text-[9px] text-muted-foreground">{hint}</span><div className="mt-2">{children}</div></label>; }
