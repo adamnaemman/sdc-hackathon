@@ -1,5 +1,5 @@
 import { type ReactNode, createContext, useContext, useMemo, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { useHealthCheck, useListMarketSignals, useListWorkforceRoles } from '@workspace/api-client-react';
 import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
+import { LiveTrendStrip } from '@/components/live-trend-strip';
+import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ type AppContextValue = {
   health: string; profile: ProfileData; setProfile: (p: ProfileData) => void;
   mode: DisruptionMode; setMode: (m: DisruptionMode) => void; selectedRoleId: string;
   setSelectedRoleId: (id: string) => void; scores: (role: WorkforceRole) => number; urgency: (role: WorkforceRole) => number;
+  trends?: TrendSnapshot; trendsLoading: boolean; trendsError: boolean; trendsRefreshing: boolean;
+  refreshTrends: () => void;
 };
 const AppContext = createContext<AppContextValue | null>(null);
 const useApp = () => {
@@ -56,25 +60,46 @@ function AppContent() {
   const rolesQuery = useListWorkforceRoles();
   const signalsQuery = useListMarketSignals();
   const healthQuery = useHealthCheck();
+  // Live trend layer: fetched once, cached by React Query for 5 minutes.
+  // If it fails, the app keeps working with the curated snapshot only.
+  const trendsQuery = useQuery({
+    queryKey: ['trends'],
+    queryFn: () => fetchTrends(),
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
   const [profile, setProfile] = useState<ProfileData>(initialProfile);
   const [mode, setMode] = useState<DisruptionMode>('Moderate');
   const [selectedRoleId, setSelectedRoleId] = useState('');
+  const [refreshingTrends, setRefreshingTrends] = useState(false);
   const roles = rolesQuery.data ?? [];
   const signals = signalsQuery.data ?? [];
-  const sortedRoles = useMemo(() => [...roles].sort((a, b) => scoreRole(b, profile, mode) - scoreRole(a, profile, mode)), [roles, profile, mode]);
+  const trendShare = (roleId: string) =>
+    trendsQuery.data?.roles.find((trend) => trend.roleId === roleId)?.share ?? 0;
+  const sortedRoles = useMemo(() => [...roles].sort((a, b) => scoreRole(b, profile, mode, trendShare(b.id)) - scoreRole(a, profile, mode, trendShare(a.id))), [roles, profile, mode, trendsQuery.data]);
   const selectedRole = roles.find((r) => r.id === selectedRoleId) ?? sortedRoles[0];
+  // Forces the server to bypass its 6-hour cache, then stores the fresh result.
+  const refreshTrends = () => {
+    setRefreshingTrends(true);
+    void fetchTrends({ refresh: true })
+      .then((fresh) => { queryClient.setQueryData(['trends'], fresh); })
+      .catch(() => undefined)
+      .finally(() => { setRefreshingTrends(false); });
+  };
   const value: AppContextValue = {
     roles, signals, loadingRoles: rolesQuery.isLoading, loadingSignals: signalsQuery.isLoading,
     rolesError: !!rolesQuery.error, signalsError: !!signalsQuery.error,
     refetchRoles: () => { void rolesQuery.refetch(); }, refetchSignals: () => { void signalsQuery.refetch(); },
     health: healthQuery.data?.status ?? (healthQuery.isError ? 'unavailable' : 'checking'),
     profile, setProfile, mode, setMode, selectedRoleId: selectedRole?.id ?? '', setSelectedRoleId,
-    scores: (role) => scoreRole(role, profile, mode), urgency: (role) => urgencyFor(role, mode, profile),
+    scores: (role) => scoreRole(role, profile, mode, trendShare(role.id)), urgency: (role) => urgencyFor(role, mode, profile),
+    trends: trendsQuery.data, trendsLoading: trendsQuery.isLoading, trendsError: !!trendsQuery.error,
+    trendsRefreshing: refreshingTrends, refreshTrends,
   };
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
 
-function scoreRole(role: WorkforceRole, profile: ProfileData, mode: DisruptionMode) {
+function scoreRole(role: WorkforceRole, profile: ProfileData, mode: DisruptionMode, demandShare = 0) {
   const requiredSkills = role.requiredSkills ?? [];
   const transferableSkills = role.transferableSkills ?? [];
   const direct = requiredSkills.length ? requiredSkills.filter((skill) => hasProfileSkill(profile, skill)).length / requiredSkills.length : 0;
@@ -82,7 +107,10 @@ function scoreRole(role: WorkforceRole, profile: ProfileData, mode: DisruptionMo
   const sectorMatch = profile.targetSectors.some((sector) => normalize(role.sector).includes(normalize(sector)) || normalize(sector).includes(normalize(role.sector))) ? 1 : 0;
   const experienceLift = Math.min(profile.yearsExperience, 15) * .42;
   const intensity = mode === 'Aggressive' ? Number(role.disruptionExposure || 0) * .19 : Number(role.disruptionExposure || 0) * .08;
-  return Math.max(38, Math.min(96, Math.round(45 + direct * 25 + transferable * 20 + sectorMatch * 8 + experienceLift - intensity)));
+  // Live demand contributes at most 12 points, so it can move a ranking but can
+  // never override a candidate's own skills and goals.
+  const demandLift = Math.max(0, Math.min(1, demandShare)) * 12;
+  return Math.max(38, Math.min(96, Math.round(45 + direct * 25 + transferable * 20 + sectorMatch * 8 + experienceLift + demandLift - intensity)));
 }
 function urgencyFor(role: WorkforceRole, mode: DisruptionMode, profile: ProfileData) {
   const exposure = Number(role.disruptionExposure || 0);
@@ -176,7 +204,7 @@ function ErrorState({ label, retry }: { label: string; retry: () => void }) { re
 function Metric({ label, value, caption, icon: Icon }: { label: string; value: string; caption: string; icon: typeof Gauge }) { return <div className="flex items-start gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary"><Icon size={17}/></div><div><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">{label}</div><div className="mt-1 text-[18px] font-bold leading-none">{value}</div><div className="mt-1 text-[10px] text-muted-foreground">{caption}</div></div></div>; }
 
 function Dashboard() {
-  const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile } = useApp();
+  const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends } = useApp();
   const [search, setSearch] = useState('');
   const ordered = useMemo(() => [...roles].sort((a, b) => scores(b) - scores(a)), [roles, scores]);
   const filtered = ordered.filter((r) => `${r.title} ${r.sector} ${r.summary}`.toLowerCase().includes(search.toLowerCase()));
@@ -184,6 +212,7 @@ function Dashboard() {
   if (rolesError) return <><PageHeading eyebrow="Role explorer" title="Your next chapter, in view." description="Compare roles through the strengths you already carry and the skills you can build next."/><ErrorState label="roles" retry={refetchRoles}/></>;
   return <div className="page-enter">
      <PageHeading eyebrow="Role explorer · 01" title={<>A next step that starts<br className="hidden sm:block"/> with what you know.</>} description="Explore adjacent roles through a synthetic procurement profile. Edit the example to see how transferable skills change each estimate." right={<div className="rounded-xl border border-border bg-card px-3 py-2 text-right"><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">Synthetic example · starting point</div><div className="mt-1 text-[12px] font-semibold" data-testid="text-current-role">{profile.currentRole || 'Add your role in profile'}</div></div>}/>
+    <LiveTrendStrip snapshot={trends} roles={roles} isLoading={trendsLoading} isError={trendsError} isRefreshing={trendsRefreshing} onRefresh={refreshTrends}/>
     <Card className="mb-7 overflow-hidden border-primary/10 bg-primary text-primary-foreground" testId="card-transition-context">
       <div className="surface-grid grid gap-7 p-5 sm:p-7 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
         <div><div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-primary-foreground/65"><Sparkles size={14}/>A practical starting point</div><h2 className="font-display mt-3 max-w-xl text-[23px] font-semibold leading-tight tracking-[-.04em] sm:text-[27px]">Your people skills have more than one place to go.</h2><p className="mt-2 max-w-lg text-[12px] leading-relaxed text-primary-foreground/68">Compare fit signals, training effort, and local market evidence. You can adjust your profile at any time.</p>
