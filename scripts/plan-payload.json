@@ -1,0 +1,26 @@
+{
+  "profile": {
+    "currentRole": "Procurement Assistant",
+    "industry": "Procurement & operations",
+    "yearsExperience": 7,
+    "skills": [
+      "Vendor communication",
+      "Manual PO processing",
+      "Microsoft Excel",
+      "Inventory auditing"
+    ],
+    "competencies": [
+      "Communication",
+      "Attention to detail",
+      "Organization"
+    ],
+    "targetSectors": ["Smart logistics", "Technology"],
+    "weeklyHours": 6
+  },
+  "mode": "Moderate",
+  "candidates": [
+    { "roleId": "ai-operations", "score": 78 },
+    { "roleId": "sustainable-supply-chain", "score": 82 },
+    { "roleId": "operations-research", "score": 70 }
+  ]
+}
