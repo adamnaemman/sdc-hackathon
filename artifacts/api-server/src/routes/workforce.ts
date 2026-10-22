@@ -6,7 +6,7 @@ import {
 
 const router: IRouter = Router();
 
-const roles = [
+export const roles = [
   {
     id: "ai-operations",
     title: "AI Operations Specialist",
