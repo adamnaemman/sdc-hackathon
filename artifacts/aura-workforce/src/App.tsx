@@ -258,23 +258,28 @@ function ProfilePage() {
   const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [suggested, setSuggested] = useState<{ tools: string[]; practical: string[]; competencies: string[] } | null>(null);
   const [showAllSkills, setShowAllSkills] = useState(false);
-  const [addingSkill, setAddingSkill] = useState(false);
   const [customSkill, setCustomSkill] = useState('');
+  const [customSector, setCustomSector] = useState('');
   const vocabulary = new Set(skillGroups.flatMap((group) => group.options));
   const customSkills = draft.skills.filter((skill) => !vocabulary.has(skill));
   const addCustomSkill = () => {
     const value = customSkill.trim();
-    if (!value) { setAddingSkill(false); return; }
+    if (!value) return;
     if (!draft.skills.includes(value)) {
       setDraft((current) => ({ ...current, skills: [...current.skills, value] }));
     }
     setCustomSkill('');
-    setAddingSkill(false);
     setSaved(false);
   };
   const removeCustomSkill = (skill: string) => {
     setDraft((current) => ({ ...current, skills: current.skills.filter((item) => item !== skill) }));
     setSaved(false);
+  };
+  const addCustomSector = () => {
+    const value = customSector.trim();
+    if (!value) return;
+    if (!draft.targetSectors.includes(value)) toggleList('targetSectors', value);
+    setCustomSector('');
   };
 
   // Step 0 -> 1: the AI turns "role + industry + years" into concrete skills.
@@ -383,18 +388,17 @@ function ProfilePage() {
             {skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}
             <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
           </>}
-          <div className="flex flex-wrap items-center gap-2" data-testid="row-add-skill">
-            {customSkills.map((skill) => <button key={skill} type="button" onClick={() => removeCustomSkill(skill)} className="focus-ring inline-flex items-center gap-1 rounded-lg border border-dashed border-primary/50 bg-primary/5 px-2.5 py-1.5 text-[10px] text-primary" data-testid={`tag-custom-skill-${normalize(skill)}`}>{skill} <X size={10}/></button>)}
-            {addingSkill ? <>
-              <input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addCustomSkill(); } if (event.key === 'Escape') { setAddingSkill(false); setCustomSkill(''); } }} autoFocus placeholder="e.g. Blender, bookkeeping" className="form-input w-[220px]" aria-label="Name the skill you want to add" data-testid="input-add-skill"/>
-              <button type="button" onClick={addCustomSkill} className="focus-ring rounded-lg bg-primary px-3 py-2 text-[10px] font-semibold text-primary-foreground" data-testid="button-confirm-add-skill">Add</button>
-              <button type="button" onClick={() => { setAddingSkill(false); setCustomSkill(''); }} className="text-[10px] text-muted-foreground underline underline-offset-2">Cancel</button>
-            </> : <button type="button" onClick={() => setAddingSkill(true)} className="focus-ring rounded-lg border border-dashed border-border px-3 py-2 text-[10px] font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground" data-testid="button-add-skill">+ Add a skill</button>}
-          </div>
+          <Field label="Add a skill or tool we missed" hint="Optional — it stays in your profile and is sent to the planner">
+            <div className="flex gap-2">
+              <input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addCustomSkill(); } }} placeholder="e.g. Blender, bookkeeping" className="form-input" data-testid="input-add-skill"/>
+              <button type="button" onClick={addCustomSkill} className="shrink-0 rounded-lg bg-secondary px-4 text-[10px] font-semibold hover:bg-secondary/70" data-testid="button-add-skill">Add</button>
+            </div>
+          </Field>
+          {customSkills.length > 0 && <div className="flex flex-wrap items-center gap-2" data-testid="row-custom-skills">{customSkills.map((skill) => <button key={skill} type="button" onClick={() => removeCustomSkill(skill)} className="focus-ring inline-flex items-center gap-1 rounded-lg border border-dashed border-primary/50 bg-primary/5 px-2.5 py-1.5 text-[10px] text-primary" data-testid={`tag-custom-skill-${normalize(skill)}`}>{skill} <X size={10}/></button>)}</div>}
           <p className="text-[9px] leading-relaxed text-muted-foreground" data-testid="note-skill-glossary">Definitions: <a href="/skill-glossary.pdf" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">skill glossary (45 entries, PDF)</a> · Full reference: <a href="/skill-taxonomy-onet.pdf" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">1,000 O*NET technologies, A–Z (PDF)</a> · Taxonomies: <a href="https://www.onetonline.org/find/descriptor/browse/2.B/" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">O*NET</a> · <a href="https://esco.ec.europa.eu/en/classification/skill_main" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">ESCO</a></p>
           <div className="rounded-lg bg-secondary/40 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-strengths-explanation">Transferable skills are not limited to formal job titles. Include experience from volunteering, caregiving, community work, and life.</div>
         </div>}
-        {step === 2 && <div className="space-y-6"><ChoiceGroup title="Sectors you would like to explore" description="Choose any number. These preferences influence fit estimates, not eligibility." options={sectors} chosen={draft.targetSectors} toggle={(v) => toggleList('targetSectors',v)} prefix="sector"/><Field label="Add a sector or interest" hint="Optional — enter a field not listed"><div className="flex gap-2"><input id="custom-sector" placeholder="e.g. Arts and culture" className="form-input" data-testid="input-custom-sector"/><button onClick={() => { const field = document.getElementById('custom-sector') as HTMLInputElement; if(field.value.trim() && !draft.targetSectors.includes(field.value.trim())) toggleList('targetSectors',field.value.trim()); field.value=''; }} className="shrink-0 rounded-lg bg-secondary px-4 text-[10px] font-semibold hover:bg-secondary/70" data-testid="button-add-sector">Add</button></div></Field></div>}
+        {step === 2 && <div className="space-y-6"><ChoiceGroup title="Sectors you would like to explore" description="Choose any number. These preferences influence fit estimates, not eligibility." options={sectors} chosen={draft.targetSectors} toggle={(v) => toggleList('targetSectors',v)} prefix="sector"/><Field label="Add a sector or interest" hint="Optional — enter a field not listed"><div className="flex gap-2"><input value={customSector} onChange={(event) => setCustomSector(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addCustomSector(); } }} placeholder="e.g. Arts and culture" className="form-input" data-testid="input-custom-sector"/><button type="button" onClick={addCustomSector} className="shrink-0 rounded-lg bg-secondary px-4 text-[10px] font-semibold hover:bg-secondary/70" data-testid="button-add-sector">Add</button></div></Field></div>}
         {step === 3 && <div className="space-y-6"><div className="rounded-xl border border-border bg-secondary/35 p-5"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-card text-primary"><Clock3 size={19}/></div><div><div className="text-[12px] font-semibold">A realistic weekly rhythm</div><p className="mt-1 text-[10px] text-muted-foreground">Pathway timelines use your available learning hours.</p></div></div><div className="mt-6 flex items-end justify-between gap-4"><div><div className="font-mono-ui text-[9px] uppercase tracking-widest text-muted-foreground">Hours available per week</div><div className="mt-1 font-display text-[34px] font-bold tracking-[-.06em]" data-testid="text-hours-preview">{draft.weeklyHours} <span className="font-sans text-[14px] font-medium tracking-normal text-muted-foreground">hours</span></div></div><input type="range" min="1" max="20" step="1" value={draft.weeklyHours} onChange={(e) => update('weeklyHours', Number(e.target.value))} className="w-1/2 accent-[hsl(var(--primary))]" aria-label="Weekly study hours" data-testid="slider-weekly-hours"/></div><div className="mt-3 flex justify-between font-mono-ui text-[9px] text-muted-foreground"><span>1 hr</span><span>10 hrs</span><span>20 hrs</span></div></div><div className="grid gap-3 sm:grid-cols-3"><Metric label="Skills selected" value={`${draft.skills.length + draft.competencies.length}`} caption="Strengths to build on" icon={Target}/><Metric label="Sectors" value={`${draft.targetSectors.length}`} caption="Areas to explore" icon={BriefcaseBusiness}/><Metric label="Study rhythm" value={`${draft.weeklyHours}h`} caption="Available each week" icon={Clock3}/></div></div>}
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
