@@ -244,14 +244,20 @@ function ProfilePage() {
    // thinks "which part of my job is this?", not "is this a technical skill?".
    // Competencies are already the people/thinking axis below.
    const skillGroups = [
+     { key: 'tools', title: 'Tools & software', description: 'The systems someone in this role actually opens.', options: ['Microsoft Excel','Power BI','SQL','Python','Figma','Canva','Adobe Creative Suite','SAP / ERP systems','CRM systems','Google Analytics'] },
      { key: 'ops', title: 'Business operations & procurement', description: 'Work with suppliers, stock, money or hiring.', options: ['Vendor communication','Supplier coordination','Procurement','Manual PO processing','Inventory management','Inventory auditing','Logistics coordination','Cash handling','Recruitment support','Quality assurance'] },
      { key: 'care', title: 'Care, education & customer-facing', description: 'Work where the person in front of you is the job.', options: ['Clinical documentation','Patient coordination','Shift scheduling','Teaching & facilitation','Customer support'] },
-     { key: 'data', title: 'Data, documentation & process', description: 'Turning records into something other people can use.', options: ['Microsoft Excel','Data entry','Data analysis','Documentation','Report writing','Process mapping'] },
+     { key: 'data', title: 'Data, documentation & process', description: 'Turning records into something other people can use.', options: ['Data entry','Data analysis','Documentation','Report writing','Process mapping'] },
      { key: 'creative', title: 'Creative & project work', description: 'Making things, and getting them finished with other people.', options: ['Visual design','Content writing','Project coordination'] },
    ];
+   // Which of the above are software/tools. Used to split the AI's suggestion
+   // into "tools", "practical skills" and "ways of working".
+   const toolSkills = new Set(['Microsoft Excel','Power BI','SQL','Python','Figma','Canva','Adobe Creative Suite','SAP / ERP systems','CRM systems','Google Analytics']);
   const [inferring, setInferring] = useState(false);
   const [skillsSource, setSkillsSource] = useState<'ai' | 'empty' | 'failed' | null>(null);
   const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
+  const [suggested, setSuggested] = useState<{ tools: string[]; practical: string[]; competencies: string[] } | null>(null);
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   // Step 0 -> 1: the AI turns "role + industry + years" into concrete skills.
   // If the model is unavailable we still advance — a broken model must never
@@ -294,6 +300,11 @@ function ProfilePage() {
                 : draft.competencies,
           };
           setSuggestedSummary(suggestion.summary?.trim() ? suggestion.summary.trim() : null);
+          setSuggested({
+            tools: suggestedSkills.filter((skill) => toolSkills.has(skill)),
+            practical: suggestedSkills.filter((skill) => !toolSkills.has(skill)),
+            competencies: suggestedCompetencies,
+          });
           setSkillsSource('ai');
         } else {
           // The model answered, but nothing in its answer matched our vocabulary.
@@ -338,8 +349,16 @@ function ProfilePage() {
           {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested"><span className="font-semibold">Suggested from your role. </span>{suggestedSummary ? <>{suggestedSummary} </> : null}Untick anything that does not describe your work.</div>}
           {skillsSource === 'empty' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-empty">We couldn't map that role onto our skill list. Pick the closest options below — your years of experience still count.</div>}
           {skillsSource === 'failed' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-failed">We couldn't suggest skills automatically just now. Pick the ones that apply below.</div>}
-          {skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}
-          <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
+          {skillsSource === 'ai' && suggested ? <div className="space-y-6">
+            {suggested.tools.length > 0 && <ChoiceGroup title="Tools & software" description="What this role actually uses, according to the model." options={suggested.tools} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix="sugg-tool"/>}
+            {suggested.practical.length > 0 && <ChoiceGroup title="Practical skills for this role" description="Tasks you would recognise from the job." options={suggested.practical} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix="sugg-practical"/>}
+            {suggested.competencies.length > 0 && <ChoiceGroup title="Ways of working" description="The people skills that matter in this role." options={suggested.competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="sugg-competency"/>}
+            <button type="button" onClick={() => setShowAllSkills((current) => !current)} className="focus-ring text-[10px] font-semibold text-primary underline underline-offset-4" data-testid="button-toggle-all-skills">{showAllSkills ? 'Hide the full skill list' : 'Something missing? Show the full skill list'}</button>
+            {showAllSkills && <div className="space-y-6 border-t border-border pt-5">{skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}<ChoiceGroup title="All people and work competencies" description="Every competency in the vocabulary." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/></div>}
+          </div> : <>
+            {skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}
+            <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
+          </>}
           <div className="rounded-lg bg-secondary/40 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-strengths-explanation">Transferable skills are not limited to formal job titles. Include experience from volunteering, caregiving, community work, and life.</div>
         </div>}
         {step === 2 && <div className="space-y-6"><ChoiceGroup title="Sectors you would like to explore" description="Choose any number. These preferences influence fit estimates, not eligibility." options={sectors} chosen={draft.targetSectors} toggle={(v) => toggleList('targetSectors',v)} prefix="sector"/><Field label="Add a sector or interest" hint="Optional — enter a field not listed"><div className="flex gap-2"><input id="custom-sector" placeholder="e.g. Arts and culture" className="form-input" data-testid="input-custom-sector"/><button onClick={() => { const field = document.getElementById('custom-sector') as HTMLInputElement; if(field.value.trim() && !draft.targetSectors.includes(field.value.trim())) toggleList('targetSectors',field.value.trim()); field.value=''; }} className="shrink-0 rounded-lg bg-secondary px-4 text-[10px] font-semibold hover:bg-secondary/70" data-testid="button-add-sector">Add</button></div></Field></div>}

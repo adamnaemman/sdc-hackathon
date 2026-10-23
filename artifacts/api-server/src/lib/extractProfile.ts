@@ -29,33 +29,44 @@ import { logger } from "./logger";
 // ---------------------------------------------------------------------------
 
 export const ALLOWED_SKILLS = [
+  // Tools and software
+  "Microsoft Excel",
+  "Power BI",
+  "SQL",
+  "Python",
+  "Figma",
+  "Canva",
+  "Adobe Creative Suite",
+  "SAP / ERP systems",
+  "CRM systems",
+  "Google Analytics",
+  // Business operations and procurement
   "Vendor communication",
   "Manual PO processing",
-  "Microsoft Excel",
   "Inventory auditing",
   "Procurement",
   "Supplier coordination",
-  "Data entry",
   "Inventory management",
-  "Process mapping",
-  "Documentation",
-  "Data analysis",
-  "Project coordination",
-  // Added so the vocabulary covers the personas in the domain brief, not just
-  // procurement. Without these a nurse or a designer has nothing relevant to
-  // be suggested, and the AI looks useless even when it is working correctly.
+  "Logistics coordination",
+  "Cash handling",
+  "Recruitment support",
+  "Quality assurance",
+  // Care, education and customer-facing
   "Clinical documentation",
   "Patient coordination",
   "Shift scheduling",
   "Teaching & facilitation",
   "Customer support",
+  // Data, documentation and process
+  "Data entry",
+  "Data analysis",
+  "Documentation",
+  "Report writing",
+  "Process mapping",
+  // Creative and project work
   "Visual design",
   "Content writing",
-  "Report writing",
-  "Quality assurance",
-  "Logistics coordination",
-  "Cash handling",
-  "Recruitment support",
+  "Project coordination",
 ] as const;
 
 export const ALLOWED_COMPETENCIES = [
@@ -114,6 +125,7 @@ const SYSTEM_PROMPT = `You convert a short, informal description of someone's wo
 Rules:
 - Output JSON only. No prose, no markdown, no code fences.
 - "skills" and "competencies" values MUST come from the allowed lists. Never invent one. It is correct to return fewer, or none.
+- Return between 4 and 8 skills that someone in THIS role and industry would plausibly have today, and between 3 and 5 competencies. Prefer the tools they actually use and the tasks they actually perform; do not pad the list with generic office skills.
 - "currentRole": a short job title in the person's own words, maximum 6 words. Return "" if no role is stated.
 - "yearsExperience": whole number 0-60. Only set it if the text states or clearly implies it, otherwise 0.
 - "summary": one plain-English sentence, maximum 25 words, describing what this person does.
