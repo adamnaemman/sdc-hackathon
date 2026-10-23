@@ -24,6 +24,7 @@ export type SkillDemand = {
   name: string;
   count: number;
   share: number; // 0..1
+  series: number[]; // mentions per week, oldest first
 };
 
 export type TrendSnapshot = {
@@ -34,6 +35,7 @@ export type TrendSnapshot = {
   sampleSize: number;
   roles: RoleTrend[];
   topSkills: SkillDemand[];
+  weeks: string[];
   cached: boolean;
   stale: boolean;
 };

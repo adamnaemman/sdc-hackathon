@@ -46,6 +46,8 @@ export type SkillDemand = {
   name: string;
   count: number;
   share: number;
+  /** Mentions per week, oldest first. Four buckets covering the last 28 days. */
+  series: number[];
 };
 
 export type TrendSnapshot = {
@@ -57,6 +59,8 @@ export type TrendSnapshot = {
   roles: RoleTrend[];
   /** The most-mentioned skills across ALL postings — independent of our catalogue. */
   topSkills: SkillDemand[];
+  /** ISO start date of each weekly bucket, oldest first. */
+  weeks: string[];
   /** True when the numbers come from the in-memory cache rather than a fresh fetch. */
   cached: boolean;
   /** True when we could not reach the source and are serving the last good snapshot. */
@@ -198,10 +202,13 @@ const TAG_STOP_WORDS = new Set([
  * five roles we happened to pick.
  */
 function computeTopSkills(
-  postings: ReadonlyArray<{ tags: string[] }>,
+  postings: ReadonlyArray<{ tags: string[]; createdAt: number }>,
   sampleSize: number,
+  nowMs: number,
 ): SkillDemand[] {
   const counts = new Map<string, number>();
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const buckets = 4;
 
   for (const posting of postings) {
     const seen = new Set<string>();
@@ -217,14 +224,43 @@ function computeTopSkills(
     }
   }
 
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([name, count]) => ({
-      name,
-      count,
-      share: sampleSize === 0 ? 0 : count / sampleSize,
-    }));
+  // Weekly buckets, oldest first, so the chart can show direction rather than a
+  // single number. Postings outside the last 28 days are ignored.
+  const weekIndexOf = (createdAtSeconds: number): number => {
+    if (createdAtSeconds <= 0) return -1;
+    const ageMs = nowMs - createdAtSeconds * 1000;
+    if (ageMs < 0 || ageMs > buckets * weekMs) return -1;
+    const fromEnd = Math.floor(ageMs / weekMs);
+    return Math.min(buckets - 1, Math.max(0, buckets - 1 - fromEnd));
+  };
+
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const topNames = new Map(top.map(([name]) => [name.toLowerCase(), name]));
+
+  const seriesBySkill = new Map<string, number[]>(
+    top.map(([name]) => [name, new Array<number>(buckets).fill(0)]),
+  );
+
+  for (const posting of postings) {
+    const index = weekIndexOf(posting.createdAt);
+    if (index < 0) continue;
+
+    const seen = new Set<string>();
+    for (const rawTag of posting.tags) {
+      const key = rawTag.trim().toLowerCase();
+      if (!topNames.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      const series = seriesBySkill.get(topNames.get(key)!);
+      if (series) series[index] += 1;
+    }
+  }
+
+  return top.map(([name, count]) => ({
+    name,
+    count,
+    share: sampleSize === 0 ? 0 : count / sampleSize,
+    series: seriesBySkill.get(name) ?? new Array<number>(buckets).fill(0),
+  }));
 }
 
 /**
@@ -313,7 +349,10 @@ export async function getTrends(
       windowDays: WINDOW_DAYS,
       sampleSize: usablePostings.length,
       roles: computeRoleTrends(roles, usablePostings),
-      topSkills: computeTopSkills(usablePostings, usablePostings.length),
+      topSkills: computeTopSkills(usablePostings, usablePostings.length, nowMs),
+      weeks: [0, 1, 2, 3].map((index) =>
+        new Date(nowMs - (4 - index) * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      ),
       cached: false,
       stale: false,
     };
