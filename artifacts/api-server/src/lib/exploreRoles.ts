@@ -108,7 +108,7 @@ const ModelOutputSchema = z.object({
   note: z.coerce.string().catch(""),
 });
 
-export async function exploreRoles(profile: ExploreProfile): Promise<ExploreResult> {
+export async function exploreRoles(profile: ExploreProfile, lang: "en" | "bm" = "en"): Promise<ExploreResult> {
   const apiKey = process.env["DEEPSEEK_API_KEY"];
   if (!apiKey) throw new ExploreNotConfiguredError();
 
@@ -121,7 +121,13 @@ export async function exploreRoles(profile: ExploreProfile): Promise<ExploreResu
       max_tokens: 1100,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "system",
+          content:
+            lang === "bm"
+              ? `${SYSTEM_PROMPT}\n\nWrite every "reason", "firstStep" and "note" string in Bahasa Malaysia. Occupation titles and reference codes stay unchanged.`
+              : SYSTEM_PROMPT,
+        },
         {
           role: "user",
           content: `PERSON PROFILE\n${JSON.stringify(profile, null, 2)}\n\nPropose the JSON now.`,

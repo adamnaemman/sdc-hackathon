@@ -117,6 +117,7 @@ function App() {
 }
 
 function AppContent() {
+  const { lang } = useSettings();
   const rolesQuery = useListWorkforceRoles();
   const signalsQuery = useListMarketSignals();
   const healthQuery = useHealthCheck();
@@ -190,6 +191,7 @@ function AppContent() {
             competencies: input.competencies,
             targetSectors: input.targetSectors,
           },
+          lang,
         }),
       });
       if (!response.ok) return;
@@ -218,6 +220,7 @@ function AppContent() {
           roleTitle: role.title,
           skillsToBuild: role.skillsToBuild,
           profileSummary: `${profile.currentRole} in ${profile.industry}, ${profile.yearsExperience} years of experience. Current skills: ${profile.skills.join(', ')}.`,
+          lang,
         }),
       });
 

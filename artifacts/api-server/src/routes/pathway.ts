@@ -51,6 +51,7 @@ const RequestSchema = z.object({
   roleTitle: z.string().trim().min(2).max(120),
   skillsToBuild: z.array(z.string().max(80)).max(8).catch([]),
   profileSummary: z.string().max(600).catch(""),
+  lang: z.enum(["en", "bm"]).catch("en"),
 });
 
 const WINDOW_MS = 10 * 60 * 1000;
@@ -90,6 +91,7 @@ router.post("/pathway", async (request, response) => {
       parsedBody.data.skillsToBuild,
       parsedBody.data.profileSummary,
       library,
+      parsedBody.data.lang,
     );
     response.json(pathway);
   } catch (error) {

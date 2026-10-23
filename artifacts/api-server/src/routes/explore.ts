@@ -27,6 +27,7 @@ const ExploreRequestSchema = z.object({
     competencies: z.array(z.string().max(80)).max(30).catch([]),
     targetSectors: z.array(z.string().max(80)).max(20).catch([]),
   }),
+  lang: z.enum(["en", "bm"]).catch("en"),
 });
 
 const WINDOW_MS = 10 * 60 * 1000;
@@ -78,7 +79,7 @@ router.post("/explore", async (request, response) => {
       skills: profile.skills,
       competencies: profile.competencies,
       targetSectors: profile.targetSectors,
-    });
+    }, parsedBody.data.lang);
     response.json(result);
   } catch (error) {
     if (error instanceof ExploreNotConfiguredError) {

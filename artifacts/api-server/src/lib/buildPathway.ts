@@ -83,7 +83,7 @@ export class PathwayFailedError extends Error {
   }
 }
 
-function systemPrompt(): string {
+function systemPrompt(lang: "en" | "bm"): string {
   return `You plan a short, realistic study route for one person moving toward a named occupation.
 
 Rules, all mandatory:
@@ -94,6 +94,8 @@ Rules, all mandatory:
 - "why" is one sentence, maximum 25 words, and must refer to something in the person's profile or to the occupation itself.
 - If the library contains nothing relevant to this occupation, return an empty list and explain that in "note". Returning fewer modules is correct; padding with irrelevant courses is a failure.
 - Output JSON only, no markdown.
+
+- Write every "why", "topic" and "note" string in Bahasa Malaysia ("bm") or English ("en") as requested.
 
 Return exactly:
 {"steps":[{"moduleId":"","order":1,"why":""}],"topics":[{"topic":"","why":"","provider":""}],"note":""}`;
@@ -126,6 +128,7 @@ export async function buildPathway(
   skillsToBuild: string[],
   profileSummary: string,
   library: readonly VerifiedModule[],
+  lang: "en" | "bm" = "en",
 ): Promise<BuiltPathway> {
   const apiKey = process.env["DEEPSEEK_API_KEY"];
   if (!apiKey) throw new PathwayNotConfiguredError();
@@ -152,6 +155,8 @@ ${JSON.stringify(
     2,
   )}
 
+Language for "why", "topic" and "note": ${lang === "bm" ? "Bahasa Malaysia" : "English"}.
+
 Return the JSON now.`;
 
   const response = await fetch(API_URL, {
@@ -163,7 +168,7 @@ Return the JSON now.`;
       max_tokens: 900,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: systemPrompt() },
+        { role: "system", content: systemPrompt(lang) },
         { role: "user", content: userPrompt },
       ],
     }),

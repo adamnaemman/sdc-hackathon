@@ -120,11 +120,10 @@ export function LearningPathSection({
         <div data-testid="topic-plan">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-[11px] text-muted-foreground">
-              No verified course exists for <span className="font-semibold text-foreground">{verified.roleTitle}</span> yet,
-              so the planner wrote the study topics instead. Each link opens a search for that topic.
+              {t.plan.topicIntroBefore} <span className="font-semibold text-foreground">{verified.roleTitle}</span> {t.plan.topicIntroAfter}
             </p>
             <span className="rounded-full border border-accent/50 bg-accent/10 px-2.5 py-1 text-[9px] font-semibold">
-              Topics · search links, not courses
+              {t.plan.topicBadge}
             </span>
           </div>
 
@@ -138,7 +137,7 @@ export function LearningPathSection({
                   <div className="min-w-0 flex-1 rounded-2xl border border-border bg-card p-4">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <h3 className="font-display text-[15px] font-bold tracking-[-.02em]">{topic.topic}</h3>
-                      <span className="font-mono-ui text-[9px] text-muted-foreground">{topic.hours} h · week {index + 1}</span>
+                      <span className="font-mono-ui text-[9px] text-muted-foreground">{topic.hours} h · {t.plan.weekLabel} {index + 1}</span>
                     </div>
                     <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">{topic.why}</p>
                     <a
@@ -147,7 +146,7 @@ export function LearningPathSection({
                       rel="noreferrer"
                       className="mt-2 inline-flex items-center gap-1.5 text-[9px] font-semibold text-primary underline underline-offset-2"
                     >
-                      Search this topic on {topic.provider} <ExternalLink size={10} />
+                      {t.plan.searchOn} {topic.provider} <ExternalLink size={10} />
                     </a>
                   </div>
                 </li>
@@ -155,26 +154,26 @@ export function LearningPathSection({
             </ol>
 
             <aside className="h-fit rounded-2xl bg-primary p-5 text-primary-foreground lg:sticky lg:top-24">
-              <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">TOPIC PLAN FOR</div>
+              <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">{t.plan.topicFor}</div>
               <div className="font-display mt-1 text-[18px] font-bold tracking-[-.03em]">{verified.roleTitle}</div>
               <div className="mt-4 space-y-3 border-t border-primary-foreground/15 pt-4">
                 <div className="flex items-center gap-2">
                   <Clock3 size={14} className="text-primary-foreground/70" />
                   <div>
-                    <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">Estimated time</div>
-                    <div className="text-[14px] font-bold">{verified.totalHours} hours</div>
+                    <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">{t.plan.estimatedTime}</div>
+                    <div className="text-[14px] font-bold">{verified.totalHours} {t.plan.hours}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarDays size={14} className="text-primary-foreground/70" />
                   <div>
-                    <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">At {hoursPerWeek} h / week</div>
-                    <div className="text-[14px] font-bold">{Math.max(1, Math.ceil(verified.totalHours / hoursPerWeek))} weeks approx.</div>
+                    <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">{t.plan.atWeek} {hoursPerWeek} h / {t.plan.weekLabel}</div>
+                    <div className="text-[14px] font-bold">{Math.max(1, Math.ceil(verified.totalHours / hoursPerWeek))} {t.plan.weeks}</div>
                   </div>
                 </div>
               </div>
               <p className="mt-3 text-[9px] leading-relaxed text-primary-foreground/55">
-                Hours are our estimate of the study time, not a provider figure. Pick one course per topic yourself.
+                {t.plan.topicNote}
               </p>
             </aside>
           </div>
@@ -208,13 +207,12 @@ export function LearningPathSection({
       {!busy && steps.length === 0 && !pathwayError && !verified ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center" data-testid="learning-path-empty">
           <CalendarDays size={20} className="mx-auto text-primary" />
-          <p className="font-display mt-3 text-[17px] font-bold">No plan yet</p>
+          <p className="font-display mt-3 text-[17px] font-bold">{t.plan.emptyTitle}</p>
           <p className="mx-auto mt-1 max-w-md text-[11px] leading-relaxed text-muted-foreground">
-            Choose one of the roles in checkpoint 03 and press <span className="font-semibold">Build verified pathway</span> —
-            the plan appears here, fitted to your weekly hours.
+            {t.plan.emptyBody}
           </p>
           <a href="#roles" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground">
-            Go to checkpoint 03 <ArrowUpRight size={12} />
+            {t.plan.emptyCta} <ArrowUpRight size={12} />
           </a>
         </div>
       ) : null}
@@ -236,7 +234,7 @@ export function LearningPathSection({
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <h3 className="font-display text-[15px] font-bold tracking-[-.02em]">{step.title}</h3>
                       <span className="font-mono-ui text-[9px] text-muted-foreground">
-                        {step.hours} h · week {startWeek}{endWeek !== startWeek ? `–${endWeek}` : ''}
+                        {step.hours} h · {t.plan.weekLabel} {startWeek}{endWeek !== startWeek ? `–${endWeek}` : ''}
                       </span>
                     </div>
                     <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">{step.why}</p>
@@ -259,7 +257,7 @@ export function LearningPathSection({
 
           <aside className="h-fit rounded-2xl bg-primary p-5 text-primary-foreground lg:sticky lg:top-24">
             <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">
-              VERIFIED PLAN FOR
+              {t.plan.verifiedFor}
             </div>
             <div className="font-display mt-1 text-[18px] font-bold tracking-[-.03em]">{roleTitle}</div>
 
@@ -267,15 +265,15 @@ export function LearningPathSection({
               <div className="flex items-center gap-2">
                 <Clock3 size={14} className="text-primary-foreground/70" />
                 <div>
-                  <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">Total learning time</div>
-                  <div className="text-[14px] font-bold">{totalHours} hours</div>
+                  <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">{t.plan.totalTime}</div>
+                  <div className="text-[14px] font-bold">{totalHours} {t.plan.hours}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <CalendarDays size={14} className="text-primary-foreground/70" />
                 <div>
-                  <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">At {hoursPerWeek} h / week</div>
-                  <div className="text-[14px] font-bold">{totalWeeks} {totalWeeks === 1 ? 'week' : 'weeks'} approx.</div>
+                  <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">{t.plan.atWeek} {hoursPerWeek} h / {t.plan.weekLabel}</div>
+                  <div className="text-[14px] font-bold">{totalWeeks} {t.plan.weeks}</div>
                 </div>
               </div>
             </div>
@@ -285,7 +283,7 @@ export function LearningPathSection({
             ) : null}
 
             <p className="mt-3 text-[9px] leading-relaxed text-primary-foreground/55">
-              Course links were verified before publishing. Confirm availability with the provider.
+              {t.plan.verifiedNote}
             </p>
           </aside>
         </div>

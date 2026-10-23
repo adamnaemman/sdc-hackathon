@@ -64,6 +64,25 @@ type Copy = {
     suggestions: string[];
     error: string;
   };
+  plan: {
+    verifiedFor: string;
+    topicFor: string;
+    totalTime: string;
+    estimatedTime: string;
+    atWeek: string;
+    hours: string;
+    weeks: string;
+    weekLabel: string;
+    topicIntroBefore: string;
+    topicIntroAfter: string;
+    topicBadge: string;
+    searchOn: string;
+    verifiedNote: string;
+    topicNote: string;
+    emptyTitle: string;
+    emptyBody: string;
+    emptyCta: string;
+  };
 };
 
 export const copy: Record<Lang, Copy> = {
@@ -146,6 +165,25 @@ export const copy: Record<Lang, Copy> = {
       ],
       error: 'The assistant is unavailable right now.',
     },
+    plan: {
+      verifiedFor: 'Verified plan for',
+      topicFor: 'Topic plan for',
+      totalTime: 'Total learning time',
+      estimatedTime: 'Estimated time',
+      atWeek: 'At',
+      hours: 'hours',
+      weeks: 'weeks approx.',
+      weekLabel: 'week',
+      topicIntroBefore: 'No verified course exists for',
+      topicIntroAfter: 'yet, so the planner wrote the study topics instead. Each link opens a search for that topic.',
+      topicBadge: 'Topics · search links, not courses',
+      searchOn: 'Search this topic on',
+      verifiedNote: 'Course links were verified before publishing. Confirm availability with the provider.',
+      topicNote: 'Hours are our estimate of the study time, not a provider figure. Pick one course per topic yourself.',
+      emptyTitle: 'No plan yet',
+      emptyBody: 'Choose one of the roles in checkpoint 03 and press Build verified pathway — the plan appears here, fitted to your weekly hours.',
+      emptyCta: 'Go to checkpoint 03',
+    },
   },
   bm: {
     nav: { signals: 'Isyarat pasaran', profile: 'Profil anda', roles: 'Peranan masa depan', pathway: 'Laluan belajar' },
@@ -225,6 +263,25 @@ export const copy: Record<Lang, Copy> = {
         'Dari mana data diambil?',
       ],
       error: 'Pembantu tidak tersedia sekarang.',
+    },
+    plan: {
+      verifiedFor: 'Pelan disahkan untuk',
+      topicFor: 'Pelan topik untuk',
+      totalTime: 'Jumlah masa belajar',
+      estimatedTime: 'Anggaran masa',
+      atWeek: 'Pada',
+      hours: 'jam',
+      weeks: 'minggu lebih kurang',
+      weekLabel: 'minggu',
+      topicIntroBefore: 'Belum ada kursus yang disahkan untuk',
+      topicIntroAfter: ', jadi perancang menulis topik belajar. Setiap pautan membuka carian untuk topik itu.',
+      topicBadge: 'Topik · pautan carian, bukan kursus',
+      searchOn: 'Cari topik ini di',
+      verifiedNote: 'Pautan kursus disahkan sebelum diterbitkan. Sahkan ketersediaan dengan penyedia.',
+      topicNote: 'Jam ialah anggaran masa belajar kami, bukan angka penyedia. Pilih satu kursus bagi setiap topik.',
+      emptyTitle: 'Belum ada pelan',
+      emptyBody: 'Pilih salah satu peranan di checkpoint 03 dan tekan Bina laluan disahkan — pelan akan muncul di sini, mengikut jam mingguan anda.',
+      emptyCta: 'Pergi ke checkpoint 03',
     },
   },
 };
