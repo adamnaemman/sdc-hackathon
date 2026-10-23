@@ -258,19 +258,31 @@ function outlookMetric(role: WorkforceRole) {
 function WorkspaceShell() {
   const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, pathwayError, pathwayRoleTitle, buildPathwayFor, profile } = useApp();
   const { t } = useSettings();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  // The sidebar is shared by the planner and /about. On /about the anchor targets
+  // do not exist, so navigate home first, then scroll once the sections mount.
+  const goToSection = (id: string) => {
+    setMobileNav(false);
+    if (location !== '/') {
+      setLocation('/');
+      window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 120);
+      return;
+    }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
   const [mobileNav, setMobileNav] = useState(false);
   const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
   return <div className="aura-shell flex bg-background text-foreground">
     <aside className={`sidebar fixed inset-y-0 left-0 z-40 flex w-[258px] flex-col bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${mobileNav ? 'translate-x-0' : '-translate-x-full'}`} data-testid="navigation-sidebar">
-      <div className="flex items-center gap-3 px-6 pt-7 pb-8">
+      <Link href="/" className="flex items-center gap-3 px-6 pt-7 pb-8" data-testid="link-home">
         <div className="brand-mark flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><Compass size={21} strokeWidth={2.3}/></div>
         <div><div className="font-display text-[19px] font-extrabold tracking-[-.06em]">AURA</div><div className="font-mono-ui text-[9px] tracking-[.2em] text-sidebar-foreground/55">WORKFORCE</div></div>
-        <button onClick={() => setMobileNav(false)} aria-label="Close navigation" className="ml-auto rounded-md p-2 lg:hidden" data-testid="button-close-navigation"><X size={18}/></button>
-      </div>
+      </Link>
+      <button onClick={() => setMobileNav(false)} aria-label="Close navigation" className="absolute right-3 top-7 rounded-md p-2 lg:hidden" data-testid="button-close-navigation"><X size={18}/></button>
       <div className="px-5 pb-3 font-mono-ui text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/45">Your workspace</div>
       <nav className="flex flex-col gap-1 px-3" aria-label="Main navigation">
-        {navItems.map(({ href, key, icon: Icon }) => <a key={href} href={href} onClick={() => setMobileNav(false)} className="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid={`link-${href.slice(1)}`}>
+        {navItems.map(({ href, key, icon: Icon }) => <a key={href} href={href} onClick={(event) => { event.preventDefault(); goToSection(href.slice(1)); }} className="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid={`link-${href.slice(1)}`}>
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-foreground/5"><Icon size={17}/></span>
           <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold">{t.nav[key]}</span><span className="mt-0.5 block text-[10px] text-sidebar-foreground/45">{t.navDetail[key]}</span></span>
         </a>)}
