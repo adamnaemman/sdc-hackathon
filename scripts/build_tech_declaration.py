@@ -83,6 +83,7 @@ DATASETS = [
     ("Arbeitnow Job Board API (live postings)", "https://www.arbeitnow.com/api/job-board-api", "Public", "Public API, free, no key", "N"),
     ("AURA role and learning-step catalogue", "https://github.com/adamnaemman/sdc-hackathon", "Synthetic / curated by the team", "Team-owned, sources cited in app", "N"),
     ("Hays Asia Salary Guide 2025 (two figures, quoted)", "Cited in PRD section 2.1", "Public", "Quoted with attribution", "N"),
+    ("O*NET 30.1 database (technology skills reference)", "https://www.onetcenter.org/database.html", "Public", "CC BY 4.0", "N"),
 ]
 
 AI_TOOLS = [
