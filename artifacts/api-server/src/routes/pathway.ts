@@ -15,6 +15,7 @@ import { Router, type IRouter } from "express";
 import { z } from "@workspace/api-zod";
 import { roles } from "./workforce";
 import { buildPathway, PathwayFailedError, PathwayNotConfiguredError, type VerifiedModule } from "../lib/buildPathway";
+import { generalModules } from "../data/generalModules";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -36,6 +37,14 @@ for (const role of roles) {
       costNote: module.costNote,
     });
   }
+}
+
+// General courses (design, project, data) are appended so an AI-proposed
+// occupation outside the curated roles still has somewhere real to go.
+for (const module of generalModules) {
+  if (seenUrls.has(module.url)) continue;
+  seenUrls.add(module.url);
+  library.push(module);
 }
 
 const RequestSchema = z.object({
