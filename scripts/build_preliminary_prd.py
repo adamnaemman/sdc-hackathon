@@ -138,11 +138,12 @@ SDG_ROWS = [
 
 PREEXISTING_DESCRIPTION = (
     "Yes. Created by the team leader before the official hacking period: the React/Vite interface shell "
-    "and design system (11 September 2026 onward), the curated reference catalogue of 3 roles, 12 learning "
+    "and design system (11 September 2026 onward), the original curated catalogue of 3 roles, 12 learning "
     "modules and 6 sourced market signals, and the OpenAPI contract scaffolding. All of it is declared "
     "here under the pre-existing work rule. Built entirely during the Phase 1 hacking period "
-    "(19-25 October 2026): the live trend-signal layer, the explainable score breakdown, the scenario "
-    "model, and all Phase 1 documentation."
+    "(19-25 October 2026): the live trend-signal layer, the AI profile extraction and the AI planner, the "
+    "explainable score breakdown, the scenario model, two additional roles with their learning steps, and "
+    "all Phase 1 documentation."
 )
 
 THIRD_PARTY = [

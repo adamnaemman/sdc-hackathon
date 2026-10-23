@@ -15,6 +15,8 @@ import { useHealthCheck, useListMarketSignals, useListWorkforceRoles } from '@wo
 import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
 import { LiveTrendStrip } from '@/components/live-trend-strip';
 import { AiPlanCard } from '@/components/ai-plan-card';
+import { ExtractProfile } from '@/components/extract-profile';
+import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
 
@@ -241,6 +243,17 @@ function ProfilePage() {
    const competencies = ['Communication','Adaptability','Coaching','Reliability','Empathy','Attention to detail','Organization','Decision making','Collaboration'];
    const sectors = ['Smart logistics','Technology','Healthcare','Education','Public services','Logistics','Clean energy','Financial services','Community services'];
   const saveAndContinue = () => { setProfile(draft); setSaved(true); if (step < 3) setStep(step + 1); };
+  // Merge AI extraction into the draft without overwriting what the user already chose.
+  const applyExtraction = (result: { currentRole: string; yearsExperience: number; skills: string[]; competencies: string[] }) => {
+    setDraft((current) => ({
+      ...current,
+      currentRole: result.currentRole || current.currentRole,
+      yearsExperience: result.yearsExperience > 0 ? result.yearsExperience : current.yearsExperience,
+      skills: Array.from(new Set([...current.skills, ...result.skills])),
+      competencies: Array.from(new Set([...current.competencies, ...result.competencies])),
+    }));
+    setSaved(false);
+  };
   return <div className="page-enter">
      <PageHeading eyebrow="Your profile · 02" title="Name what you already bring." description="A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends." right={<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="text-primary"/>Not saved to an account</div>}/>
     <div className="grid gap-7 lg:grid-cols-[250px_1fr]">
@@ -254,9 +267,12 @@ function ProfilePage() {
       </aside>
       <Card className="p-5 sm:p-7" testId="card-profile-step">
         <div className="mb-6 flex items-center justify-between border-b border-border pb-4"><div><div className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">STEP 0{step+1} OF 04</div><h2 className="font-display mt-1 text-[22px] font-bold tracking-[-.04em]">{steps[step]}</h2></div><div className="font-mono-ui text-[10px] text-muted-foreground">{Math.round(((step+1)/4)*100)}% complete</div></div>
+        <ExtractProfile onApply={applyExtraction}/>
         {step === 0 && <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Current role" hint="What best describes your work today?"><input value={draft.currentRole} onChange={(e) => update('currentRole', e.target.value)} placeholder="e.g. Customer service team lead" className="form-input" data-testid="input-current-role"/></Field>
-          <Field label="Industry" hint="Your current field or sector"><input value={draft.industry} onChange={(e) => update('industry', e.target.value)} placeholder="e.g. Retail & customer service" className="form-input" data-testid="input-industry"/></Field>
+          <Field label="Industry" hint="Your current field or sector — pick one or type your own"><input value={draft.industry} onChange={(e) => update('industry', e.target.value)} list="industry-options" placeholder="e.g. Healthcare" className="form-input" data-testid="input-industry"/><datalist id="industry-options">
+            {['Healthcare','Education','Public services','Procurement & operations','Logistics & transport','Retail & e-commerce','Manufacturing','Financial services','Construction','Hospitality & tourism','Technology','Telecommunications','Energy & utilities','Agriculture','Media & creative','Professional services','Community services','Oil, gas & chemicals'].map((option) => <option key={option} value={option}/>)}
+          </datalist></Field>
           <Field label="Years of experience" hint="Across your working life"><div className="relative"><input min="0" max="60" type="number" value={draft.yearsExperience} onChange={(e) => update('yearsExperience', Number(e.target.value))} className="form-input pr-16" data-testid="input-years-experience"/><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">years</span></div></Field>
           <div className="rounded-xl bg-secondary/50 p-4"><div className="text-[11px] font-semibold">Start where you are</div><p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">A career transition can build on existing knowledge. You do not need to start over to explore something new.</p></div>
         </div>}
@@ -275,6 +291,7 @@ function ProfilePage() {
       </Card>
     </div>
     <AiPlanCard roles={roles} profile={draft} mode={mode}/>
+    <ExploreRoles profile={draft}/>
   </div>;
 }
 function Field({ label, hint, children }: { label: string; hint: string; children: ReactNode }) { return <label className="block"><span className="text-[11px] font-semibold">{label}</span><span className="mt-1 block text-[9px] text-muted-foreground">{hint}</span><div className="mt-2">{children}</div></label>; }
@@ -303,7 +320,7 @@ function PathwayPage() {
         return <article key={module.id} className="relative grid grid-cols-[42px_1fr] gap-2 sm:grid-cols-[50px_1fr] sm:gap-3" data-testid={`module-${module.id}`}>
           <div className="relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background font-mono-ui text-[10px] font-medium sm:h-12 sm:w-12">{String(index+1).padStart(2,'0')}</div>
           <Card className="min-w-0 overflow-hidden"><button onClick={() => setExpanded(open ? null : module.id)} className="flex w-full items-start justify-between gap-4 p-4 text-left sm:p-5" aria-expanded={open} data-testid={`button-module-expand-${module.id}`}><div className="min-w-0"><div className="mb-1 flex flex-wrap items-center gap-2"><span className="font-mono-ui text-[8px] uppercase tracking-[.13em] text-muted-foreground">{module.skill}</span><span className="rounded-full bg-secondary px-2 py-0.5 text-[8px] text-secondary-foreground">{module.hours} hours</span><span className="text-[8px] text-muted-foreground">≈ {weeks} {weeks === 1 ? 'week' : 'weeks'}</span></div><h3 className="font-display text-[16px] font-bold tracking-[-.03em]" data-testid={`text-module-title-${module.id}`}>{module.title}</h3><p className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-muted-foreground">{module.description}</p></div><ChevronDown size={16} className={`mt-1 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}/></button>
-          {open && <div className="border-t border-border bg-secondary/25 px-4 py-4 sm:px-5"><div className="grid gap-4 sm:grid-cols-2"><div><div className="font-mono-ui text-[8px] uppercase tracking-widest text-muted-foreground">Prerequisites</div>{module.prerequisites?.length ? <ul className="mt-2 space-y-1">{module.prerequisites.map((prereq) => <li key={prereq} className="flex items-start gap-2 text-[10px]" data-testid={`text-prerequisite-${module.id}-${normalize(prereq)}`}><CircleDot size={12} className="mt-0.5 shrink-0 text-primary"/>{prereq}</li>)}</ul> : <p className="mt-2 text-[10px] text-muted-foreground">No prerequisites listed.</p>}</div><div><div className="font-mono-ui text-[8px] uppercase tracking-widest text-muted-foreground">Resource & cost</div><div className="mt-2 text-[10px] font-semibold">{module.provider}</div><p className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{module.costNote || 'Check the provider for current costs and availability.'}</p>{module.url && <a href={module.url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary underline underline-offset-4" data-testid={`link-module-resource-${module.id}`}>Visit learning resource <ExternalLink size={12}/></a>}</div></div>{module.sdgTargets?.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5 border-t border-border pt-3">{module.sdgTargets.map((target) => <span key={target} className="rounded-full border border-border bg-card px-2 py-1 text-[8px] text-muted-foreground" data-testid={`tag-module-sdg-${module.id}-${normalize(target)}`}>{target}</span>)}</div>}</div>}</Card></article>;
+          {open && <div className="border-t border-border bg-secondary/25 px-4 py-4 sm:px-5"><div className="grid gap-4 sm:grid-cols-2"><div><div className="font-mono-ui text-[8px] uppercase tracking-widest text-muted-foreground">Prerequisites</div>{module.prerequisites?.length ? <ul className="mt-2 space-y-1">{module.prerequisites.map((prereq) => <li key={prereq} className="flex items-start gap-2 text-[10px]" data-testid={`text-prerequisite-${module.id}-${normalize(prereq)}`}><CircleDot size={12} className="mt-0.5 shrink-0 text-primary"/>{modules.find((candidate) => candidate.id === prereq)?.title ?? prereq}</li>)}</ul> : <p className="mt-2 text-[10px] text-muted-foreground">No prerequisites listed.</p>}</div><div><div className="font-mono-ui text-[8px] uppercase tracking-widest text-muted-foreground">Resource & cost</div><div className="mt-2 text-[10px] font-semibold">{module.provider}</div><p className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{module.costNote || 'Check the provider for current costs and availability.'}</p>{module.url && <a href={module.url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary underline underline-offset-4" data-testid={`link-module-resource-${module.id}`}>Visit learning resource <ExternalLink size={12}/></a>}</div></div>{module.sdgTargets?.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5 border-t border-border pt-3">{module.sdgTargets.map((target) => <span key={target} className="rounded-full border border-border bg-card px-2 py-1 text-[8px] text-muted-foreground" data-testid={`tag-module-sdg-${module.id}-${normalize(target)}`}>{target}</span>)}</div>}</div>}</Card></article>;
       })}</div>}
     <div className="mt-6 rounded-xl border border-border bg-secondary/40 p-4 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-pathway-caveat"><CircleHelp size={14} className="mr-2 inline text-primary"/>Providers and links are listed as supplied. Confirm course details, accessibility, and cost before enrolling.</div>
   </div>;
