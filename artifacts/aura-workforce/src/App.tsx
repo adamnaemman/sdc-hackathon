@@ -316,10 +316,14 @@ function ProfilePage() {
           // user's behalf. Only skills they typed themselves survive, because
           // those were a deliberate action.
           const keepCustom = draft.skills.filter((skill) => !vocabulary.has(skill));
+          // Tools are pre-ticked because they are factual — you either use SAP or
+          // you do not — while judgement-based skills and competencies stay
+          // unticked so the person decides for themselves.
+          const preTickedTools = suggestedSkills.filter((skill) => toolSkills.has(skill));
           next = {
             ...draft,
             currentRole: draft.currentRole || suggestion.currentRole || '',
-            skills: keepCustom,
+            skills: Array.from(new Set([...keepCustom, ...preTickedTools])),
             competencies: [],
           };
           setSuggestedSummary(suggestion.summary?.trim() ? suggestion.summary.trim() : null);
@@ -369,7 +373,7 @@ function ProfilePage() {
           <div className="rounded-xl bg-secondary/50 p-4"><div className="text-[11px] font-semibold">Start where you are</div><p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">A career transition can build on existing knowledge. You do not need to start over to explore something new.</p></div>
         </div>}
         {step === 1 && <div className="space-y-6">
-          {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested"><span className="font-semibold">Suggested for you — nothing is pre-selected. </span>{suggestedSummary ? <>{suggestedSummary} </> : null}Tick the ones that describe your work.</div>}
+          {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested"><span className="font-semibold">Suggested for you. </span>{suggestedSummary ? <>{suggestedSummary} </> : null}Tools are pre-ticked because they are factual; tick the rest yourself.</div>}
           {skillsSource === 'empty' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-empty">We couldn't map that role onto our skill list. Pick the closest options below — your years of experience still count.</div>}
           {skillsSource === 'failed' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-failed">We couldn't suggest skills automatically just now. Pick the ones that apply below.</div>}
           {skillsSource === 'ai' && suggested ? <div className="space-y-6">
