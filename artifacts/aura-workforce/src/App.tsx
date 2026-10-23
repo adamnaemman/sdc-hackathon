@@ -17,6 +17,7 @@ import { LiveTrendStrip } from '@/components/live-trend-strip';
 import { AiPlanCard } from '@/components/ai-plan-card';
 import { FutureRolesSection } from '@/components/future-roles-section';
 import { LearningPathSection } from '@/components/learning-path-section';
+import { HeroSection } from '@/components/hero-section';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
@@ -289,12 +290,7 @@ function WorkspaceShell() {
       </header>
       <main className="mx-auto w-full max-w-[1500px] px-4 sm:px-7 lg:px-10">
         <ErrorBoundary>
-          <section className="page-enter pb-4 pt-10 sm:pt-14">
-            <div className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.19em] text-muted-foreground"><span className="h-px w-5 bg-accent"/>A guide, not a verdict</div>
-            <h1 className="font-display max-w-4xl text-[38px] font-bold leading-[1.05] tracking-[-.06em] sm:text-[54px]">From who you are today,<br/>to what you learn next.</h1>
-            <p className="mt-4 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">Four checkpoints: the market evidence, your profile, the roles the AI concludes fit you, and a study plan built around the hours you actually have. Every claim carries a source and a date.</p>
-            <a href="#signals" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[11px] font-semibold text-primary-foreground">Start with checkpoint 01 <ArrowRight size={14}/></a>
-          </section>
+          <HeroSection/>
 
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
           <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
