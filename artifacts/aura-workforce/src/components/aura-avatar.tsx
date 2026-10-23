@@ -70,10 +70,10 @@ export function AuraAvatar() {
   }, []);
 
   return (
-    <div className="mt-6 flex items-center gap-4" data-testid="aura-avatar">
+    <div className="mt-7 flex items-center gap-4 lg:mt-9 lg:gap-6" data-testid="aura-avatar">
       <div className="relative shrink-0">
         <span aria-hidden className="absolute inset-0 -z-10 rounded-full bg-[hsl(var(--accent)/.22)] blur-xl" />
-        <svg width="86" height="86" viewBox="0 0 100 100" role="img" aria-label="AURA guide">
+        <svg className="h-24 w-24 shrink-0 sm:h-32 sm:w-32 lg:h-44 lg:w-44" viewBox="0 0 100 100" role="img" aria-label="AURA guide">
           <defs>
             <radialGradient id="aura-head" cx="35%" cy="28%" r="78%">
               <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity=".95" />
@@ -107,12 +107,12 @@ export function AuraAvatar() {
         </svg>
       </div>
 
-      <div className="relative max-w-[19rem] rounded-2xl rounded-bl-sm border border-border bg-card/95 px-3.5 py-2.5 shadow-[0_10px_30px_-18px_rgba(20,40,36,.5)]">
-        <p className="text-[11px] leading-relaxed text-foreground" data-testid="text-aura-line">
+      <div className="relative max-w-[20rem] rounded-2xl rounded-bl-sm border border-border bg-card/95 px-4 py-3 shadow- lg:max-w-[28rem] lg:px-5 lg:py-4[0_10px_30px_-18px_rgba(20,40,36,.5)]">
+        <p className="text-[11px] leading-relaxed text-foreground sm:text-[12px] lg:text-[14px]" data-testid="text-aura-line">
           {typed || '\u00A0'}
           {typed.length < line.length ? <span className="ml-0.5 inline-block w-[2px] animate-pulse bg-foreground align-middle">&nbsp;</span> : null}
         </p>
-        <span className="mt-1 block font-mono-ui text-[8px] uppercase tracking-[.16em] text-muted-foreground">AURA · guide</span>
+        <span className="mt-1.5 block font-mono-ui text-[8px] uppercase tracking-[.16em] text-muted-foreground lg:text-[9px]">AURA · guide</span>
       </div>
     </div>
   );

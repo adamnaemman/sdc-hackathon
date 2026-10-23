@@ -81,7 +81,7 @@ export function HeroSection() {
           </a>
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">
+        <div className="mt-9 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">
           <span>{t.hero.chip1}</span>
           <span className="text-accent">·</span>
           <span>{t.hero.chip2}</span>
@@ -91,7 +91,7 @@ export function HeroSection() {
 
         <a
           href="#signals"
-          className="mt-14 inline-flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.22em] text-muted-foreground transition-colors hover:text-foreground"
+          className="mt-10 inline-flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.22em] text-muted-foreground transition-colors hover:text-foreground"
           aria-label={t.hero.scroll}
         >
           <ChevronDown size={14} className="animate-bounce" />
