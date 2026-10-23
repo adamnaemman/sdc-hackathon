@@ -7,11 +7,11 @@
  * fast and matches the palette.
  */
 
-import { ArrowRight, Compass } from 'lucide-react';
+import { ArrowRight, ChevronDown, Compass } from 'lucide-react';
 
 export function HeroSection() {
   return (
-    <section className="relative isolate flex min-h-[86vh] flex-col justify-center overflow-hidden py-14 sm:py-20" data-testid="hero">
+    <section className="relative isolate flex min-h-[calc(100svh-4.5rem)] flex-col justify-center overflow-hidden py-14 sm:py-20" data-testid="hero">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0" style={{
           backgroundImage:
@@ -88,6 +88,15 @@ export function HeroSection() {
           <span className="text-accent">·</span>
           <span>Private by design</span>
         </div>
+
+        <a
+          href="#signals"
+          className="mt-14 inline-flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.22em] text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Scroll to checkpoint 01"
+        >
+          <ChevronDown size={14} className="animate-bounce" />
+          Scroll to checkpoint 01
+        </a>
       </div>
     </section>
   );
