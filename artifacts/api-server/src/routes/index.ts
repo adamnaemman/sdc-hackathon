@@ -7,6 +7,7 @@ import planRouter from "./plan";
 import exploreRouter from "./explore";
 import libraryRouter from "./library";
 import pathwayRouter from "./pathway";
+import helpRouter from "./help";
 
 const router: IRouter = Router();
 router.use(healthRouter);
@@ -17,5 +18,6 @@ router.use(planRouter);
 router.use(exploreRouter);
 router.use(libraryRouter);
 router.use(pathwayRouter);
+router.use(helpRouter);
 
 export default router;

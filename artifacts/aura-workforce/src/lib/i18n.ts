@@ -53,6 +53,17 @@ type Copy = {
     start: string;
     never: string;
   };
+  ask: {
+    button: string;
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    send: string;
+    thinking: string;
+    disclaimer: string;
+    suggestions: string[];
+    error: string;
+  };
 };
 
 export const copy: Record<Lang, Copy> = {
@@ -119,6 +130,22 @@ export const copy: Record<Lang, Copy> = {
       start: 'Start',
       never: "Don't show this again",
     },
+    ask: {
+      button: 'Ask AURA',
+      title: 'Ask AURA',
+      subtitle: 'Answers about how this page works — not job advice.',
+      placeholder: 'Ask how the app works…',
+      send: 'Send',
+      thinking: 'Thinking…',
+      disclaimer: "Answered from this app's own help text. It cannot invent features, courses or jobs.",
+      suggestions: [
+        'What do the four checkpoints do?',
+        'Why is my pathway empty?',
+        'Is my profile saved?',
+        'Where does the data come from?',
+      ],
+      error: 'The assistant is unavailable right now.',
+    },
   },
   bm: {
     nav: { signals: 'Isyarat pasaran', profile: 'Profil anda', roles: 'Peranan masa depan', pathway: 'Laluan belajar' },
@@ -182,6 +209,22 @@ export const copy: Record<Lang, Copy> = {
       privacy: 'Tiada akaun, tiada CV, tiada simpanan. Profil anda kekal dalam pelayar ini.',
       start: 'Mula',
       never: 'Jangan tunjuk lagi',
+    },
+    ask: {
+      button: 'Tanya AURA',
+      title: 'Tanya AURA',
+      subtitle: 'Jawapan tentang cara halaman ini berfungsi — bukan nasihat kerja.',
+      placeholder: 'Tanya cara app ini berfungsi…',
+      send: 'Hantar',
+      thinking: 'Sedang berfikir…',
+      disclaimer: 'Dijawab daripada teks bantuan app ini. Ia tidak boleh reka ciri, kursus atau pekerjaan.',
+      suggestions: [
+        'Apa fungsi empat checkpoint?',
+        'Kenapa laluan saya kosong?',
+        'Adakah profil saya disimpan?',
+        'Dari mana data diambil?',
+      ],
+      error: 'Pembantu tidak tersedia sekarang.',
     },
   },
 };

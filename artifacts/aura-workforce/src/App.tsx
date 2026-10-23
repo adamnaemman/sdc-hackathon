@@ -20,6 +20,7 @@ import { LearningPathSection } from '@/components/learning-path-section';
 import { HeroSection } from '@/components/hero-section';
 import { AboutPage } from '@/components/about-page';
 import { WelcomeDialog } from '@/components/welcome-dialog';
+import { AskAura } from '@/components/ask-aura';
 import { SettingsProvider, SettingsControls, useSettings } from '@/lib/settings';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
@@ -325,6 +326,7 @@ function WorkspaceShell() {
           <span>{t.footer.left}</span><span className="font-mono-ui tracking-[.08em]">{t.footer.right}</span>
         </footer>
       </main>
+      <AskAura/>
     </div>
   </div>;
 }
