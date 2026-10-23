@@ -258,6 +258,16 @@ function ProfilePage() {
   const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [suggested, setSuggested] = useState<{ tools: string[]; practical: string[]; competencies: string[] } | null>(null);
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [customSkill, setCustomSkill] = useState('');
+  const vocabulary = new Set(skillGroups.flatMap((group) => group.options));
+  const customSkills = draft.skills.filter((skill) => !vocabulary.has(skill));
+  const addCustomSkill = () => {
+    const value = customSkill.trim();
+    if (!value || draft.skills.includes(value)) { setCustomSkill(''); return; }
+    setDraft((current) => ({ ...current, skills: [...current.skills, value] }));
+    setCustomSkill('');
+    setSaved(false);
+  };
 
   // Step 0 -> 1: the AI turns "role + industry + years" into concrete skills.
   // If the model is unavailable we still advance — a broken model must never
@@ -359,6 +369,16 @@ function ProfilePage() {
             {skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}
             <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
           </>}
+          <div className="rounded-xl border border-dashed border-border p-4" data-testid="card-custom-skill">
+            <div className="text-[11px] font-semibold">Not on the list at all?</div>
+            <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">Add your own skill. It will not match a role requirement automatically, but it stays in your profile.</p>
+            <div className="mt-2 flex gap-2">
+              <input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addCustomSkill(); } }} placeholder="e.g. welding, bookkeeping, barista" className="form-input" aria-label="Add a skill we do not list" data-testid="input-custom-skill"/>
+              <button type="button" onClick={addCustomSkill} className="focus-ring shrink-0 rounded-lg bg-secondary px-4 text-[10px] font-semibold hover:bg-secondary/70" data-testid="button-add-custom-skill">Add</button>
+            </div>
+            {customSkills.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{customSkills.map((skill) => <button key={skill} type="button" onClick={() => { setDraft((current) => ({ ...current, skills: current.skills.filter((item) => item !== skill) })); setSaved(false); }} className="focus-ring inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/5 px-2 py-1 text-[9px] text-primary" data-testid={`tag-custom-skill-${normalize(skill)}`}>{skill} <X size={10}/></button>)}</div>}
+            <p className="mt-3 text-[9px] leading-relaxed text-muted-foreground">Reference taxonomies: <a href="https://www.onetonline.org/find/descriptor/browse/2.B/" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">O*NET skills</a> · <a href="https://esco.ec.europa.eu/en/classification/skill_main" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">ESCO (13,939 skills, PDF/JSON)</a></p>
+          </div>
           <div className="rounded-lg bg-secondary/40 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-strengths-explanation">Transferable skills are not limited to formal job titles. Include experience from volunteering, caregiving, community work, and life.</div>
         </div>}
         {step === 2 && <div className="space-y-6"><ChoiceGroup title="Sectors you would like to explore" description="Choose any number. These preferences influence fit estimates, not eligibility." options={sectors} chosen={draft.targetSectors} toggle={(v) => toggleList('targetSectors',v)} prefix="sector"/><Field label="Add a sector or interest" hint="Optional — enter a field not listed"><div className="flex gap-2"><input id="custom-sector" placeholder="e.g. Arts and culture" className="form-input" data-testid="input-custom-sector"/><button onClick={() => { const field = document.getElementById('custom-sector') as HTMLInputElement; if(field.value.trim() && !draft.targetSectors.includes(field.value.trim())) toggleList('targetSectors',field.value.trim()); field.value=''; }} className="shrink-0 rounded-lg bg-secondary px-4 text-[10px] font-semibold hover:bg-secondary/70" data-testid="button-add-sector">Add</button></div></Field></div>}
