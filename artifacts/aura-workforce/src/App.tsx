@@ -84,7 +84,7 @@ type AppContextValue = {
   refreshTrends: () => void;
   plan: AiPlan | null; planLoading: boolean; generatePlan: (input: ProfileData) => Promise<void>;
   explored: ExploreResult | null; exploredLoading: boolean; generateExplore: (input: ProfileData) => Promise<void>;
-  exploredPathway: VerifiedPathway | null; pathwayLoading: boolean; buildPathwayFor: (role: ExploredRole) => Promise<void>;
+  exploredPathway: VerifiedPathway | null; pathwayLoading: boolean; pathwayError: string | null; buildPathwayFor: (role: ExploredRole) => Promise<void>;
 };
 const AppContext = createContext<AppContextValue | null>(null);
 const useApp = () => {
@@ -196,10 +196,12 @@ function AppContent() {
   };
   const [exploredPathway, setExploredPathway] = useState<VerifiedPathway | null>(null);
   const [pathwayLoading, setPathwayLoading] = useState(false);
+  const [pathwayError, setPathwayError] = useState<string | null>(null);
   // Builds a pathway for an AI-proposed occupation. The model may only choose
   // courses from our verified library, so every step has a real URL.
   const buildPathwayFor = async (role: ExploredRole) => {
     setPathwayLoading(true);
+    setPathwayError(null);
     try {
       const response = await fetch('/api/pathway', {
         method: 'POST',
@@ -210,11 +212,16 @@ function AppContent() {
           profileSummary: `${profile.currentRole} in ${profile.industry}, ${profile.yearsExperience} years of experience. Current skills: ${profile.skills.join(', ')}.`,
         }),
       });
-      if (!response.ok) return;
+
+      if (!response.ok) {
+        const detail = (await response.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(detail?.message ?? `The planner returned HTTP ${response.status}.`);
+      }
+
       setExploredPathway((await response.json()) as VerifiedPathway);
       document.getElementById('pathway')?.scrollIntoView({ behavior: 'smooth' });
-    } catch {
-      // The curated plan below remains available.
+    } catch (caught) {
+      setPathwayError(caught instanceof Error ? caught.message : 'Could not build the pathway.');
     } finally {
       setPathwayLoading(false);
     }
@@ -230,7 +237,7 @@ function AppContent() {
     trendsRefreshing: refreshingTrends, refreshTrends,
     plan, planLoading, generatePlan,
     explored, exploredLoading, generateExplore,
-    exploredPathway, pathwayLoading, buildPathwayFor,
+    exploredPathway, pathwayLoading, pathwayError, buildPathwayFor,
   };
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
@@ -242,7 +249,7 @@ function outlookMetric(role: WorkforceRole) {
 }
 
 function WorkspaceShell() {
-  const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, buildPathwayFor, profile } = useApp();
+  const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, pathwayError, buildPathwayFor, profile } = useApp();
   const [location] = useLocation();
   const [mobileNav, setMobileNav] = useState(false);
   const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
@@ -289,7 +296,7 @@ function WorkspaceShell() {
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
           <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
           <FutureRolesSection explored={explored} exploredLoading={exploredLoading} onBuildPathway={buildPathwayFor} pathwayLoading={pathwayLoading}/>
-          <LearningPathSection plan={plan} planLoading={planLoading} verified={exploredPathway} pathwayLoading={pathwayLoading} weeklyHours={profile.weeklyHours}/>
+          <LearningPathSection verified={exploredPathway} pathwayLoading={pathwayLoading} pathwayError={pathwayError} weeklyHours={profile.weeklyHours}/>
         </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">
           <span>Directional estimates only. Your experience and judgment lead the way.</span><span className="font-mono-ui tracking-[.08em]">AURA · PRIVACY-FIRST PLANNING</span>
@@ -571,7 +578,7 @@ function ProfilePage() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
           <div className="flex items-center gap-3">{saved && <span className="flex items-center gap-1 text-[10px] text-primary" data-testid="status-profile-updated"><CheckCircle2 size={13}/>Updated for this session</span>}
-            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void Promise.all([generatePlan(draft), generateExplore(draft)]).then(() => { document.getElementById('roles')?.scrollIntoView({ behavior: 'smooth' }); }); }} disabled={planLoading || exploredLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{planLoading || exploredLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
+            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void generateExplore(draft).then(() => { document.getElementById('roles')?.scrollIntoView({ behavior: 'smooth' }); }); }} disabled={exploredLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{exploredLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
         </div>
       </Card>
     </div>

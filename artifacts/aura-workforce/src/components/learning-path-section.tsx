@@ -12,7 +12,7 @@
  * have each week, so the plan is a schedule, not a wish.
  */
 
-import { ArrowUpRight, CalendarDays, Clock3, ExternalLink } from 'lucide-react';
+import { ArrowUpRight, AlertTriangle, CalendarDays, Clock3, ExternalLink } from 'lucide-react';
 
 type PathwayStep = {
   moduleId: string;
@@ -52,21 +52,19 @@ type VerifiedPathway = {
 };
 
 type LearningPathSectionProps = {
-  plan: Plan | null;
-  planLoading: boolean;
   verified: VerifiedPathway | null;
   pathwayLoading: boolean;
+  pathwayError: string | null;
   weeklyHours: number;
 };
 
 export function LearningPathSection({
-  plan,
-  planLoading,
   verified,
   pathwayLoading,
+  pathwayError,
   weeklyHours,
 }: LearningPathSectionProps) {
-  const verifiedSteps: PathwayStep[] = (verified?.steps ?? []).map((step) => ({
+  const steps: PathwayStep[] = (verified?.steps ?? []).map((step) => ({
     moduleId: step.moduleId,
     title: step.title,
     order: step.order,
@@ -76,13 +74,11 @@ export function LearningPathSection({
     url: step.url,
   }));
 
-  const usingVerified = verifiedSteps.length > 0;
-  const steps: PathwayStep[] = usingVerified ? verifiedSteps : plan?.pathway ?? [];
-  const roleTitle = usingVerified ? verified?.roleTitle : plan?.recommendedRoleTitle;
-  const totalHours = usingVerified ? verified?.totalHours ?? 0 : steps.reduce((sum, step) => sum + Number(step.hours || 0), 0);
+  const roleTitle = verified?.roleTitle;
+  const totalHours = verified?.totalHours ?? 0;
   const hoursPerWeek = Math.max(1, weeklyHours);
   const totalWeeks = Math.max(1, Math.ceil(totalHours / hoursPerWeek));
-  const busy = planLoading || pathwayLoading;
+  const busy = pathwayLoading;
 
   return (
     <section id="pathway" className="scroll-mt-24 border-t border-border py-10">
@@ -107,7 +103,18 @@ export function LearningPathSection({
         </div>
       ) : null}
 
-      {!busy && steps.length === 0 ? (
+      {pathwayError ? (
+        <div className="rounded-2xl border border-accent/40 bg-accent/10 p-4" data-testid="pathway-error">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+            <p className="text-[11px] leading-relaxed">
+              {pathwayError} The pathway could not be generated — try again, or choose another role in checkpoint 03.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {!busy && steps.length === 0 && !pathwayError ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center" data-testid="learning-path-empty">
           <CalendarDays size={20} className="mx-auto text-primary" />
           <p className="font-display mt-3 text-[17px] font-bold">No plan yet</p>
@@ -161,7 +168,7 @@ export function LearningPathSection({
 
           <aside className="h-fit rounded-2xl bg-primary p-5 text-primary-foreground lg:sticky lg:top-24">
             <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">
-              {usingVerified ? 'VERIFIED PLAN FOR' : 'PLAN FOR'}
+              VERIFIED PLAN FOR
             </div>
             <div className="font-display mt-1 text-[18px] font-bold tracking-[-.03em]">{roleTitle}</div>
 
@@ -182,18 +189,12 @@ export function LearningPathSection({
               </div>
             </div>
 
-            {usingVerified && verified?.note ? (
+            {verified?.note ? (
               <p className="mt-4 border-t border-primary-foreground/15 pt-3 text-[9px] leading-relaxed text-primary-foreground/70">{verified.note}</p>
             ) : null}
 
-            {!usingVerified && plan?.nextAction ? (
-              <p className="mt-4 border-t border-primary-foreground/15 pt-3 text-[10px] leading-relaxed text-primary-foreground/80">
-                <span className="font-semibold text-primary-foreground">Next step: </span>{plan.nextAction}
-              </p>
-            ) : null}
-
             <p className="mt-3 text-[9px] leading-relaxed text-primary-foreground/55">
-              {usingVerified ? 'Course links verified before publishing. Confirm availability with the provider.' : plan?.caveat || 'Directional guidance only.'}
+              Course links were verified before publishing. Confirm availability with the provider.
             </p>
           </aside>
         </div>
