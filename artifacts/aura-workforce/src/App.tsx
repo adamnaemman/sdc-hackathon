@@ -22,6 +22,7 @@ import { AboutPage } from '@/components/about-page';
 import { WelcomeDialog } from '@/components/welcome-dialog';
 import { AskAura } from '@/components/ask-aura';
 import { SettingsProvider, SettingsControls, useSettings } from '@/lib/settings';
+import { signalBm } from '@/lib/signal-translations';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
@@ -668,14 +669,15 @@ function SignalsPage() {
   </div>;
 }
 function SignalCard({ signal, publishedDate }: { signal: MarketSignal; publishedDate: (date: string) => string }) {
-  const { t } = useSettings();
+  const { t, lang } = useSettings();
+  const bm = lang === 'bm' ? signalBm[signal.id] : undefined;
   return <Card className="overflow-hidden transition-colors hover:border-primary/35" testId={`card-signal-${signal.id}`}>
-    <div className="p-5 sm:p-6"><div className="flex flex-wrap items-center justify-between gap-3"><span className="rounded-md bg-secondary px-2 py-1 font-mono-ui text-[8px] uppercase tracking-[.1em]">{signal.category}</span><span className="flex items-center gap-1.5 text-[9px] text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full ${signal.live ? 'bg-[hsl(var(--chart-1))]' : 'bg-muted-foreground/50'}`}/>{signal.live ? t.signals.liveSource : t.signals.snapshot}</span></div>
-      <h2 className="font-display mt-4 max-w-xl text-[18px] font-bold leading-snug tracking-[-.035em]" data-testid={`text-signal-title-${signal.id}`}>{signal.title}</h2>
-      <div className="mt-4 flex items-end justify-between gap-4 border-y border-border/80 py-4"><div><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">{t.signals.reportedValue}</div><div className="mt-1 flex items-baseline gap-1"><span className="font-display text-[29px] font-bold tracking-[-.06em]" data-testid={`metric-signal-value-${signal.id}`}>{formatValue(signal.value)}</span><span className="text-[10px] text-muted-foreground">{signal.unit}</span></div></div><div className="text-right"><div className="font-mono-ui text-[8px] uppercase tracking-[.13em] text-muted-foreground">{t.signals.period}</div><div className="mt-1 text-[10px] font-semibold" data-testid={`text-signal-period-${signal.id}`}>{signal.period}</div></div></div>
-      <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground" data-testid={`text-signal-summary-${signal.id}`}>{signal.summary}</p>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border/70 pt-3 text-[9px]"><span className="flex items-center gap-1.5 text-foreground"><Users size={12} className="text-primary"/>{signal.geography}</span><span className="flex items-center gap-1.5 text-muted-foreground"><Clock3 size={12}/>{publishedDate(signal.published)}</span></div>
-      <div className="mt-3 rounded-lg bg-secondary/45 p-3 text-[9px] leading-relaxed text-muted-foreground" data-testid={`text-source-note-${signal.id}`}><span className="font-semibold text-foreground">{t.signals.sourceNote} · </span>{signal.sourceNote}</div>
+    <div className="p-5 sm:p-6"><div className="flex flex-wrap items-center justify-between gap-3"><span className="rounded-md bg-secondary px-2 py-1 font-mono-ui text-[8px] uppercase tracking-[.1em]">{t.signals.categoryMap[signal.category] ?? signal.category}</span><span className="flex items-center gap-1.5 text-[9px] text-muted-foreground"><span className={`h-1.5 w-1.5 rounded-full ${signal.live ? 'bg-[hsl(var(--chart-1))]' : 'bg-muted-foreground/50'}`}/>{signal.live ? t.signals.liveSource : t.signals.snapshot}</span></div>
+      <h2 className="font-display mt-4 max-w-xl text-[18px] font-bold leading-snug tracking-[-.035em]" data-testid={`text-signal-title-${signal.id}`}>{bm?.title ?? signal.title}</h2>
+      <div className="mt-4 flex items-end justify-between gap-4 border-y border-border/80 py-4"><div><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">{t.signals.reportedValue}</div><div className="mt-1 flex items-baseline gap-1"><span className="font-display text-[29px] font-bold tracking-[-.06em]" data-testid={`metric-signal-value-${signal.id}`}>{formatValue(signal.value)}</span><span className="text-[10px] text-muted-foreground">{bm?.unit ?? signal.unit}</span></div></div><div className="text-right"><div className="font-mono-ui text-[8px] uppercase tracking-[.13em] text-muted-foreground">{t.signals.period}</div><div className="mt-1 text-[10px] font-semibold" data-testid={`text-signal-period-${signal.id}`}>{signal.period}</div></div></div>
+      <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground" data-testid={`text-signal-summary-${signal.id}`}>{bm?.summary ?? signal.summary}</p>
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border/70 pt-3 text-[9px]"><span className="flex items-center gap-1.5 text-foreground"><Users size={12} className="text-primary"/>{bm?.geography ?? signal.geography}</span><span className="flex items-center gap-1.5 text-muted-foreground"><Clock3 size={12}/>{publishedDate(bm?.published ?? signal.published)}</span></div>
+      <div className="mt-3 rounded-lg bg-secondary/45 p-3 text-[9px] leading-relaxed text-muted-foreground" data-testid={`text-source-note-${signal.id}`}><span className="font-semibold text-foreground">{t.signals.sourceNote} · </span>{bm?.sourceNote ?? signal.sourceNote}</div>
       <div className="mt-4 flex items-center justify-between gap-3"><span className="text-[10px] font-semibold" data-testid={`text-source-name-${signal.id}`}>{signal.sourceName}</span>{signal.sourceUrl && <a href={signal.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[9px] font-semibold text-primary underline underline-offset-4" data-testid={`link-signal-source-${signal.id}`}>{t.signals.originalSource} <ExternalLink size={11}/></a>}</div>
     </div>
   </Card>;
