@@ -84,7 +84,7 @@ type AppContextValue = {
   refreshTrends: () => void;
   plan: AiPlan | null; planLoading: boolean; generatePlan: (input: ProfileData) => Promise<void>;
   explored: ExploreResult | null; exploredLoading: boolean; generateExplore: (input: ProfileData) => Promise<void>;
-  exploredPathway: VerifiedPathway | null; pathwayLoading: boolean; pathwayError: string | null; buildPathwayFor: (role: ExploredRole) => Promise<void>;
+  exploredPathway: VerifiedPathway | null; pathwayLoading: boolean; pathwayError: string | null; pathwayRoleTitle: string | null; buildPathwayFor: (role: ExploredRole) => Promise<void>;
 };
 const AppContext = createContext<AppContextValue | null>(null);
 const useApp = () => {
@@ -197,11 +197,13 @@ function AppContent() {
   const [exploredPathway, setExploredPathway] = useState<VerifiedPathway | null>(null);
   const [pathwayLoading, setPathwayLoading] = useState(false);
   const [pathwayError, setPathwayError] = useState<string | null>(null);
+  const [pathwayRoleTitle, setPathwayRoleTitle] = useState<string | null>(null);
   // Builds a pathway for an AI-proposed occupation. The model may only choose
   // courses from our verified library, so every step has a real URL.
   const buildPathwayFor = async (role: ExploredRole) => {
     setPathwayLoading(true);
     setPathwayError(null);
+    setPathwayRoleTitle(role.title);
     try {
       const response = await fetch('/api/pathway', {
         method: 'POST',
@@ -237,7 +239,7 @@ function AppContent() {
     trendsRefreshing: refreshingTrends, refreshTrends,
     plan, planLoading, generatePlan,
     explored, exploredLoading, generateExplore,
-    exploredPathway, pathwayLoading, pathwayError, buildPathwayFor,
+    exploredPathway, pathwayLoading, pathwayError, pathwayRoleTitle, buildPathwayFor,
   };
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
@@ -249,7 +251,7 @@ function outlookMetric(role: WorkforceRole) {
 }
 
 function WorkspaceShell() {
-  const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, pathwayError, buildPathwayFor, profile } = useApp();
+  const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, pathwayError, pathwayRoleTitle, buildPathwayFor, profile } = useApp();
   const [location] = useLocation();
   const [mobileNav, setMobileNav] = useState(false);
   const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
@@ -295,7 +297,7 @@ function WorkspaceShell() {
 
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
           <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
-          <FutureRolesSection explored={explored} exploredLoading={exploredLoading} onBuildPathway={buildPathwayFor} pathwayLoading={pathwayLoading}/>
+          <FutureRolesSection explored={explored} exploredLoading={exploredLoading} onBuildPathway={buildPathwayFor} pathwayLoading={pathwayLoading} pathwayRoleTitle={pathwayRoleTitle}/>
           <LearningPathSection verified={exploredPathway} pathwayLoading={pathwayLoading} pathwayError={pathwayError} weeklyHours={profile.weeklyHours}/>
         </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">

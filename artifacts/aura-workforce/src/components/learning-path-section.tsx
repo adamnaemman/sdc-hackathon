@@ -114,7 +114,31 @@ export function LearningPathSection({
         </div>
       ) : null}
 
-      {!busy && steps.length === 0 && !pathwayError ? (
+      {!busy && verified && verified.steps.length === 0 && !pathwayError ? (
+        <div className="rounded-2xl border border-accent/40 bg-accent/10 p-6" data-testid="pathway-none">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+            <div>
+              <p className="font-display text-[16px] font-bold">No verified course yet for {verified.roleTitle}</p>
+              <p className="mt-1 max-w-xl text-[11px] leading-relaxed text-muted-foreground">
+                Our verified library covers AI operations, process automation, data and supply-chain skills —
+                it does not yet contain a course for this occupation, and the planner is not allowed to invent
+                one. Search the topic yourself, or pick another role in checkpoint 03.
+              </p>
+              <a
+                href={`https://www.coursera.org/search?query=${encodeURIComponent(verified.roleTitle)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary underline underline-offset-2"
+              >
+                Search courses for {verified.roleTitle} <ExternalLink size={10} />
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {!busy && steps.length === 0 && !pathwayError && !verified ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center" data-testid="learning-path-empty">
           <CalendarDays size={20} className="mx-auto text-primary" />
           <p className="font-display mt-3 text-[17px] font-bold">No plan yet</p>

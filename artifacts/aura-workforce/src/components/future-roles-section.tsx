@@ -34,9 +34,10 @@ type FutureRolesSectionProps = {
   exploredLoading: boolean;
   onBuildPathway?: (role: ExploredRole) => void;
   pathwayLoading?: boolean;
+  pathwayRoleTitle?: string | null;
 };
 
-export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, pathwayLoading }: FutureRolesSectionProps) {
+export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, pathwayLoading, pathwayRoleTitle }: FutureRolesSectionProps) {
   const roles = explored?.roles ?? [];
 
   return (
@@ -145,7 +146,7 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
                     data-testid={`button-pathway-${role.title}`}
                   >
                     <Sparkles size={11} />
-                    {pathwayLoading ? 'Building pathway…' : 'Build verified pathway'}
+                    {pathwayLoading && pathwayRoleTitle === role.title ? 'Building pathway…' : 'Build verified pathway'}
                   </button>
                 ) : null}
               </article>
