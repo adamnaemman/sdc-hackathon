@@ -1,13 +1,11 @@
 /**
- * LIVE TREND STRIP
- * ================
- * Shows where the demand numbers come from, when they were fetched, and how
- * many job postings they are based on — then the per-role demand.
+ * LIVE MARKET TREND
+ * =================
+ * Checkpoint 01. Shows what the live job data actually says, independent of the
+ * roles we happen to have curated: the most-mentioned skills across the recent
+ * postings, the source, the fetch time and the sample size.
  *
- * This component exists because of one sentence in the domain brief:
- * "Show the source and its date. Hard-coded lists alone do not count."
- * So the source, the date and the sample size are always visible, and the
- * failure state says so honestly instead of hiding behind fake numbers.
+ * No catalogue is involved in this chart. If the feed changes, the bars change.
  */
 
 import { ExternalLink, RefreshCw } from 'lucide-react';
@@ -26,13 +24,12 @@ type LiveTrendStripProps = {
 
 export function LiveTrendStrip({
   snapshot,
-  roles,
   isLoading,
   isError,
   isRefreshing,
   onRefresh,
 }: LiveTrendStripProps) {
-  const roleTrends = snapshot?.roles ?? [];
+  const skills = snapshot?.topSkills ?? [];
 
   return (
     <section
@@ -45,30 +42,26 @@ export function LiveTrendStrip({
           <div className="flex items-center gap-2">
             <span
               className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                isError ? 'bg-accent' : snapshot?.stale ? 'bg-accent' : 'bg-[hsl(var(--chart-1))]'
+                isError || snapshot?.stale ? 'bg-accent' : 'bg-[hsl(var(--chart-1))]'
               }`}
             />
             <span className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-muted-foreground">
-              Live trend layer
+              Live skill demand
             </span>
             {snapshot?.cached && !snapshot.stale ? (
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-[8px] text-secondary-foreground">
-                cached
-              </span>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-[8px] text-secondary-foreground">cached</span>
             ) : null}
             {snapshot?.stale ? (
-              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[8px] text-foreground">
-                last good snapshot
-              </span>
+              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[8px] text-foreground">last good snapshot</span>
             ) : null}
           </div>
 
           {isLoading ? (
-            <p className="mt-2 text-[11px] text-muted-foreground">Checking the public job feed…</p>
+            <p className="mt-2 text-[11px] text-muted-foreground">Reading the public job feed…</p>
           ) : isError ? (
             <p className="mt-2 max-w-xl text-[11px] leading-relaxed text-muted-foreground">
-              The live source could not be reached just now. The curated snapshot below still works;
-              nothing here is being replaced with invented numbers.
+              The live source could not be reached just now. The curated signals below still work; nothing
+              here is replaced with invented numbers.
             </p>
           ) : snapshot ? (
             <p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-muted-foreground">
@@ -103,50 +96,42 @@ export function LiveTrendStrip({
         </button>
       </div>
 
-      {snapshot && roleTrends.length > 0 ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {roleTrends.map((trend) => {
-            const role = roles.find((candidate) => candidate.id === trend.roleId);
-            const percent = Math.round(trend.share * 100);
+      {skills.length > 0 ? (
+        <>
+          <div className="mt-5 flex items-baseline justify-between">
+            <span className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">
+              Most requested skills right now
+            </span>
+            <span className="font-mono-ui text-[9px] text-muted-foreground">top {skills.length}</span>
+          </div>
 
-            return (
-              <div
-                key={trend.roleId}
-                className="rounded-xl border border-border/70 bg-secondary/35 p-3"
-                data-testid={`trend-${trend.roleId}`}
-              >
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-[10px] font-semibold" title={role?.title ?? trend.roleId}>
-                    {role?.title ?? trend.roleId}
+          <div className="mt-3 space-y-2" data-testid="chart-top-skills">
+            {skills.map((skill) => {
+              const percent = Math.round(skill.share * 100);
+              return (
+                <div key={skill.name} className="grid grid-cols-[minmax(96px,168px)_1fr_44px] items-center gap-3">
+                  <span className="truncate text-[10px] font-medium" title={skill.name}>
+                    {skill.name}
                   </span>
-                  <span className="font-mono-ui text-[13px] font-semibold" data-testid={`trend-share-${trend.roleId}`}>
+                  <span className="h-2 overflow-hidden rounded-full bg-border">
+                    <span
+                      className="block h-full rounded-full bg-[hsl(var(--chart-1))]"
+                      style={{ width: `${Math.max(3, percent)}%` }}
+                    />
+                  </span>
+                  <span className="text-right font-mono-ui text-[9px] text-muted-foreground">
                     {percent}%
                   </span>
                 </div>
-
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border">
-                  <div
-                    className="h-full rounded-full bg-[hsl(var(--chart-1))]"
-                    style={{ width: `${Math.min(100, Math.max(2, percent))}%` }}
-                  />
-                </div>
-
-                <div className="mt-2 text-[9px] leading-relaxed text-muted-foreground">
-                  {trend.matchedPostings} postings ·{' '}
-                  {trend.topSkills
-                    .slice(0, 2)
-                    .map((skill) => `${skill.skill} (${skill.mentions})`)
-                    .join(', ') || 'no skill matches yet'}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       ) : null}
 
-      <p className="mt-3 text-[9px] leading-relaxed text-muted-foreground">
-        Demand = share of recent public job postings mentioning at least one of a role's required
-        skills. It signals direction, not local vacancy counts, and it is not a forecast for any
+      <p className="mt-4 text-[9px] leading-relaxed text-muted-foreground">
+        Share of recent public job postings that list each skill. This is the whole feed, not a shortlist of
+        our roles — it signals direction, not Malaysian vacancy counts, and it is not a forecast for any
         individual.
       </p>
     </section>

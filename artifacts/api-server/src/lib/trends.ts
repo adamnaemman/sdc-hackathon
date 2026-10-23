@@ -42,6 +42,12 @@ export type RoleTrend = {
   topSkills: SkillTrend[];
 };
 
+export type SkillDemand = {
+  name: string;
+  count: number;
+  share: number;
+};
+
 export type TrendSnapshot = {
   source: string; // human-readable, shown in the UI
   sourceUrl: string;
@@ -49,6 +55,8 @@ export type TrendSnapshot = {
   windowDays: number; // only postings newer than this are counted
   sampleSize: number; // how many postings the numbers came from
   roles: RoleTrend[];
+  /** The most-mentioned skills across ALL postings — independent of our catalogue. */
+  topSkills: SkillDemand[];
   /** True when the numbers come from the in-memory cache rather than a fresh fetch. */
   cached: boolean;
   /** True when we could not reach the source and are serving the last good snapshot. */
@@ -135,7 +143,7 @@ function normaliseText(value: string): string {
  * The whole description is used (median ~4,300 characters): truncating it
  * halved the recall, because skill words usually appear deep in a job ad.
  */
-async function fetchPostings(): Promise<Array<{ text: string; createdAt: number }>> {
+async function fetchPostings(): Promise<Array<{ text: string; createdAt: number; tags: string[] }>> {
   const response = await fetch(SOURCE_URL, {
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     headers: { "user-agent": "aura-workforce/1.0 (SDC hackathon prototype)" },
@@ -150,11 +158,12 @@ async function fetchPostings(): Promise<Array<{ text: string; createdAt: number 
 
   return rawList.map((posting) => {
     const title = posting.title ?? "";
-    const tags = Array.isArray(posting.tags) ? posting.tags.join(" ") : "";
+    const tags = Array.isArray(posting.tags) ? posting.tags : [];
     const description = posting.description ?? "";
     return {
-      text: normaliseText(`${title} ${tags} ${description}`),
+      text: normaliseText(`${title} ${tags.join(" ")} ${description}`),
       createdAt: Number(posting.created_at ?? 0),
+      tags,
     };
   });
 }
@@ -174,6 +183,48 @@ function keywordsFor(skill: string): string[] {
   const prepared = raw.map((keyword) => normaliseText(keyword));
   keywordCache.set(skill, prepared);
   return prepared;
+}
+
+/** Tags that describe the contract, not a skill. */
+const TAG_STOP_WORDS = new Set([
+  "remote", "full time", "full-time", "part time", "part-time", "contract",
+  "permanent", "senior", "junior", "mid level", "entry level", "internship",
+  "english", "german", "hybrid", "on site", "onsite", "temporary",
+]);
+
+/**
+ * The skills that appear most often across every posting — deliberately
+ * independent of our catalogue, so the market signals are not filtered through
+ * five roles we happened to pick.
+ */
+function computeTopSkills(
+  postings: ReadonlyArray<{ tags: string[] }>,
+  sampleSize: number,
+): SkillDemand[] {
+  const counts = new Map<string, number>();
+
+  for (const posting of postings) {
+    const seen = new Set<string>();
+    for (const rawTag of posting.tags) {
+      const name = rawTag.trim();
+      if (name.length < 2 || name.length > 32) continue;
+      const key = name.toLowerCase();
+      if (TAG_STOP_WORDS.has(key) || seen.has(key)) continue;
+      seen.add(key);
+
+      const existing = counts.get(name);
+      counts.set(name, (existing ?? 0) + 1);
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, count]) => ({
+      name,
+      count,
+      share: sampleSize === 0 ? 0 : count / sampleSize,
+    }));
 }
 
 /**
@@ -262,6 +313,7 @@ export async function getTrends(
       windowDays: WINDOW_DAYS,
       sampleSize: usablePostings.length,
       roles: computeRoleTrends(roles, usablePostings),
+      topSkills: computeTopSkills(usablePostings, usablePostings.length),
       cached: false,
       stale: false,
     };

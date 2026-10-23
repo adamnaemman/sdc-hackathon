@@ -20,6 +20,12 @@ export type RoleTrend = {
   topSkills: SkillTrend[];
 };
 
+export type SkillDemand = {
+  name: string;
+  count: number;
+  share: number; // 0..1
+};
+
 export type TrendSnapshot = {
   source: string;
   sourceUrl: string;
@@ -27,6 +33,7 @@ export type TrendSnapshot = {
   windowDays: number;
   sampleSize: number;
   roles: RoleTrend[];
+  topSkills: SkillDemand[];
   cached: boolean;
   stale: boolean;
 };
