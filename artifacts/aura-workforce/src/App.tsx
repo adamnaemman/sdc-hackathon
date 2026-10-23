@@ -22,6 +22,19 @@ import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scor
 
 const queryClient = new QueryClient();
 
+type DisruptionMode = 'Moderate' | 'Aggressive';
+
+type AiPlan = {
+  recommendedRoleId: string;
+  recommendedRoleTitle: string;
+  headline: string;
+  ranking: Array<{ roleId: string; roleTitle: string; fit: number; appEstimate: number; reason: string; gaps: string[] }>;
+  pathway: Array<{ moduleId: string; title: string; order: number; hours: number; why: string }>;
+  nextAction: string;
+  caveat: string;
+  model: string;
+  generatedAt: string;
+};
 type AppContextValue = {
   roles: WorkforceRole[]; signals: MarketSignal[]; loadingRoles: boolean; loadingSignals: boolean;
   rolesError: boolean; signalsError: boolean; refetchRoles: () => void; refetchSignals: () => void;
@@ -30,6 +43,7 @@ type AppContextValue = {
   setSelectedRoleId: (id: string) => void; scores: (role: WorkforceRole) => number; urgency: (role: WorkforceRole) => number;
   trends?: TrendSnapshot; trendsLoading: boolean; trendsError: boolean; trendsRefreshing: boolean;
   refreshTrends: () => void;
+  plan: AiPlan | null; planLoading: boolean; generatePlan: (input: ProfileData) => Promise<void>;
 };
 const AppContext = createContext<AppContextValue | null>(null);
 const useApp = () => {
@@ -85,6 +99,31 @@ function AppContent() {
       .catch(() => undefined)
       .finally(() => { setRefreshingTrends(false); });
   };
+  const [plan, setPlan] = useState<AiPlan | null>(null);
+  const [planLoading, setPlanLoading] = useState(false);
+  // Generated when the user presses "Apply to role explorer". The role explorer
+  // renders this ranking; if the model is unavailable the deterministic order
+  // is used instead, so the page never blocks on the AI.
+  const generatePlan = async (input: ProfileData) => {
+    setPlanLoading(true);
+    try {
+      const candidates = roles.map((role) => ({
+        roleId: role.id,
+        score: scoreRole(role, input, mode, trendShare(role.id)),
+      }));
+      const response = await fetch('/api/plan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ profile: input, mode, candidates }),
+      });
+      if (!response.ok) return;
+      setPlan((await response.json()) as AiPlan);
+    } catch {
+      // Keep whatever plan we had; the deterministic ranking still renders.
+    } finally {
+      setPlanLoading(false);
+    }
+  };
   const value: AppContextValue = {
     roles, signals, loadingRoles: rolesQuery.isLoading, loadingSignals: signalsQuery.isLoading,
     rolesError: !!rolesQuery.error, signalsError: !!signalsQuery.error,
@@ -94,6 +133,7 @@ function AppContent() {
     scores: (role) => scoreRole(role, profile, mode, trendShare(role.id)), urgency: (role) => urgencyFor(role, mode, profile),
     trends: trendsQuery.data, trendsLoading: trendsQuery.isLoading, trendsError: !!trendsQuery.error,
     trendsRefreshing: refreshingTrends, refreshTrends,
+    plan, planLoading, generatePlan,
   };
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
@@ -171,10 +211,16 @@ function ErrorState({ label, retry }: { label: string; retry: () => void }) { re
 function Metric({ label, value, caption, icon: Icon }: { label: string; value: string; caption: string; icon: typeof Gauge }) { return <div className="flex items-start gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary"><Icon size={17}/></div><div><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">{label}</div><div className="mt-1 text-[18px] font-bold leading-none">{value}</div><div className="mt-1 text-[10px] text-muted-foreground">{caption}</div></div></div>; }
 
 function Dashboard() {
-  const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends } = useApp();
+  const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends, plan, planLoading } = useApp();
   const [search, setSearch] = useState('');
   const [showAllRoles, setShowAllRoles] = useState(false);
-  const ordered = useMemo(() => [...roles].sort((a, b) => scores(b) - scores(a)), [roles, scores]);
+  const ordered = useMemo(() => {
+    const deterministic = [...roles].sort((a, b) => scores(b) - scores(a));
+    if (!plan) return deterministic;
+    // The AI's ranking decides the order; anything it did not rank goes last.
+    const position = new Map(plan.ranking.map((entry, index) => [entry.roleId, index]));
+    return [...deterministic].sort((a, b) => (position.get(a.id) ?? 99) - (position.get(b.id) ?? 99));
+  }, [roles, scores, plan]);
   // Only roles that fall inside the sectors this person chose to explore.
   // If nothing matches (or they chose none), we show everything rather than an
   // empty page — and the toggle below makes the filter reversible.
@@ -204,17 +250,25 @@ function Dashboard() {
         </div>
       </div>
     </Card>
+    {plan ? <div className="mb-5 rounded-2xl border border-primary/25 bg-primary/5 p-4 sm:p-5" data-testid="banner-ai-recommendation">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-muted-foreground">AI recommendation · {plan.model}</span>
+        <span className="font-mono-ui text-[9px] text-muted-foreground">{new Date(plan.generatedAt).toLocaleString('en-GB')}</span>
+      </div>
+      <p className="font-display mt-2 text-[16px] font-semibold leading-snug">{plan.headline}</p>
+      <p className="mt-1 text-[10px] text-muted-foreground">Ranked from the profile you submitted. First: <span className="font-semibold text-foreground">{plan.recommendedRoleTitle}</span></p>
+    </div> : planLoading ? <div className="mb-5 rounded-2xl border border-border bg-card p-4 text-[11px] text-muted-foreground" role="status">Asking the AI to rank your roles…</div> : null}
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div><h2 className="font-display text-[20px] font-bold tracking-[-.04em]">{inMySectors ? 'Roles in the sectors you chose' : 'Roles worth exploring'}</h2><p className="mt-1 text-[11px] text-muted-foreground">{inMySectors ? <>Filtered to <span className="font-semibold text-foreground">{profile.targetSectors.join(', ')}</span> · {sectorMatches.length} of {ordered.length} roles. <button type="button" onClick={() => setShowAllRoles(true)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-show-all-roles">Show every role</button></> : profile.targetSectors.length > 0 ? <>Showing all {ordered.length} roles. <button type="button" onClick={() => setShowAllRoles(false)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-only-my-sectors">Only my sectors</button></> : 'Fit blends transferable strengths, goals, and experience. Add target sectors in your profile to narrow this list.'}</p></div>
       <label className="relative block w-full sm:w-[230px]"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search roles or sectors" className="focus-ring h-10 w-full rounded-xl border border-border bg-card pl-9 pr-3 text-[11px] outline-none" aria-label="Search roles" data-testid="input-search-roles"/></label>
     </div>
     {filtered.length === 0 ? <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center" data-testid="empty-roles"><div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-secondary"><Search size={18}/></div><div className="font-semibold">No role matches that search</div><p className="mt-1 text-xs text-muted-foreground">Try a different title or sector.</p><button onClick={() => setSearch('')} className="mt-4 text-xs font-semibold text-primary underline underline-offset-4" data-testid="button-clear-search">Clear search</button></div> :
-       <div className="grid gap-4 xl:grid-cols-2" data-testid="list-role-comparisons">{filtered.map((role, index) => <RoleCard key={role.id} role={role} profile={profile} rank={index + 1} score={scores(role)} urgency={urgency(role)} onSelect={() => setSelectedRoleId(role.id)}/>)}</div>}
+       <div className="grid gap-4 xl:grid-cols-2" data-testid="list-role-comparisons">{filtered.map((role, index) => <RoleCard key={role.id} role={role} profile={profile} rank={index + 1} score={scores(role)} urgency={urgency(role)} aiReason={plan?.ranking.find((entry) => entry.roleId === role.id)?.reason} onSelect={() => setSelectedRoleId(role.id)}/>)}</div>}
     <LibraryExplorer skills={profile.skills}/>
     <div className="mt-5 flex items-start gap-3 rounded-xl border border-border/70 bg-secondary/45 p-4 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-fit-caveat"><CircleHelp size={15} className="mt-0.5 shrink-0 text-primary"/><p><strong className="text-foreground">How to read these scores:</strong> Fit and transition urgency are directional estimates based on the profile you entered and role data. They are not hiring probabilities, performance ratings, or predictions. Speak with a counselor to add local context.</p></div>
   </div>;
 }
-function RoleCard({ role, profile, rank, score, urgency, onSelect }: { role: WorkforceRole; profile: ProfileData; rank: number; score: number; urgency: number; onSelect: () => void }) {
+function RoleCard({ role, profile, rank, score, urgency, onSelect, aiReason }: { role: WorkforceRole; profile: ProfileData; rank: number; score: number; urgency: number; onSelect: () => void; aiReason?: string }) {
   const retainedSkills = (role.transferableSkills ?? []).filter((skill) => hasProfileSkill(profile, skill));
   const skillGaps = (role.requiredSkills ?? []).filter((skill) => !hasProfileSkill(profile, skill));
   const outlook = outlookMetric(role);
@@ -225,6 +279,7 @@ function RoleCard({ role, profile, rank, score, urgency, onSelect }: { role: Wor
         <div className="flex h-[58px] w-[58px] shrink-0 flex-col items-center justify-center rounded-full border-[3px] border-[hsl(var(--chart-1)/.18)] bg-[hsl(var(--chart-1)/.07)]" data-testid={`metric-fit-${role.id}`}><span className="font-mono-ui text-[17px] font-medium leading-none">{score}</span><span className="mt-1 text-[8px] uppercase tracking-wider text-muted-foreground">fit</span></div>
       </div>
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground" data-testid={`text-role-summary-${role.id}`}>{role.summary}</p>
+      {aiReason ? <p className="mt-2 rounded-lg bg-primary/5 px-2.5 py-2 text-[10px] leading-relaxed text-foreground" data-testid={`text-ai-reason-${role.id}`}><span className="font-semibold">Why this fits: </span>{aiReason}</p> : null}
       <div className="my-4 grid grid-cols-2 gap-3 border-y border-border/70 py-4">
         <Metric label="Transition urgency" value={`${urgency}%`} caption={Number(role.disruptionExposure) > 60 ? 'More planning may help' : 'Room to plan thoughtfully'} icon={urgency > 58 ? ArrowUpRight : ArrowDownRight}/>
         <Metric label="Role outlook" value={outlook.value} caption={outlook.caption} icon={TrendingUp}/>
@@ -240,7 +295,7 @@ function RoleCard({ role, profile, rank, score, urgency, onSelect }: { role: Wor
 }
 
 function ProfilePage() {
-  const { profile, setProfile, roles, mode } = useApp();
+  const { profile, setProfile, roles, mode, generatePlan, planLoading } = useApp();
   const [, navigate] = useLocation();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState(profile);
@@ -410,7 +465,7 @@ function ProfilePage() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
           <div className="flex items-center gap-3">{saved && <span className="flex items-center gap-1 text-[10px] text-primary" data-testid="status-profile-updated"><CheckCircle2 size={13}/>Updated for this session</span>}
-            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); navigate('/'); }} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground" data-testid="button-profile-finish"><Check size={14}/>Apply to role explorer</button>}</div>
+            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void generatePlan(draft).then(() => navigate('/')); }} disabled={planLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{planLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
         </div>
       </Card>
     </div>
