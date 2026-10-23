@@ -64,6 +64,45 @@ type Copy = {
     suggestions: string[];
     error: string;
   };
+  trend: {
+    label: string;
+    cached: string;
+    stale: string;
+    loading: string;
+    error: string;
+    refresh: string;
+    refreshing: string;
+    chartTitle: string;
+    lastWeeks: string;
+    note: string;
+    postings: string;
+    days: string;
+    fetched: string;
+    source: string;
+    mentionsOf: string;
+  };
+  signals: {
+    badge: string;
+    contextTitle: string;
+    contextBody: string;
+    reviewed: string;
+    all: string;
+    search: string;
+    snapshot: string;
+    liveSource: string;
+    reportedValue: string;
+    period: string;
+    sourceNote: string;
+    originalSource: string;
+    shown: string;
+    snapshots: string;
+    notLive: string;
+    noSignalsTitle: string;
+    noSignalsBody: string;
+    noViewTitle: string;
+    noViewBody: string;
+    categoryMap: Record<string, string>;
+  };
   plan: {
     verifiedFor: string;
     topicFor: string;
@@ -165,6 +204,45 @@ export const copy: Record<Lang, Copy> = {
       ],
       error: 'The assistant is unavailable right now.',
     },
+    trend: {
+      label: 'Live skill demand',
+      cached: 'cached',
+      stale: 'last good snapshot',
+      loading: 'Reading the public job feed…',
+      error: 'The live source could not be reached just now. The curated signals below still work; nothing here is replaced with invented numbers.',
+      refresh: 'Refresh',
+      refreshing: 'Refreshing',
+      chartTitle: 'Mentions per week · most requested skills',
+      lastWeeks: 'last 4 weeks',
+      note: 'Mentions of each skill in recent public job postings, bucketed by week. This is the whole feed, not a shortlist of our roles — it signals direction, not Malaysian vacancy counts, and it is not a forecast for any individual.',
+      postings: 'postings from the last',
+      days: 'days',
+      fetched: 'fetched',
+      source: 'source',
+      mentionsOf: 'mentions',
+    },
+    signals: {
+      badge: 'Sourced snapshots · not a live feed',
+      contextTitle: 'Context, not certainty',
+      contextBody: 'These figures are sourced snapshots, not real-time updates or forecasts. Labor data can lag, vary by geography, and describe broad groups rather than individual outcomes. Open each source to review the original methodology.',
+      reviewed: 'Source links reviewed 21 Oct 2026 · each card shows its source period or publication date',
+      all: 'All signals',
+      search: 'Find a signal',
+      snapshot: 'Snapshot',
+      liveSource: 'Source marked live',
+      reportedValue: 'Reported value',
+      period: 'Period',
+      sourceNote: 'Source note',
+      originalSource: 'Original source',
+      shown: 'shown',
+      snapshots: 'snapshots',
+      notLive: 'None should be read as a live feed',
+      noSignalsTitle: 'No market signals yet',
+      noSignalsBody: 'Sourced indicators will appear here when available.',
+      noViewTitle: 'No signals in this view',
+      noViewBody: 'Try another category or search phrase.',
+      categoryMap: { 'Role demand': 'Role demand', 'Skills outlook': 'Skills outlook' },
+    },
     plan: {
       verifiedFor: 'Verified plan for',
       topicFor: 'Topic plan for',
@@ -263,6 +341,45 @@ export const copy: Record<Lang, Copy> = {
         'Dari mana data diambil?',
       ],
       error: 'Pembantu tidak tersedia sekarang.',
+    },
+    trend: {
+      label: 'Permintaan kemahiran langsung',
+      cached: 'cache',
+      stale: 'snapshot terakhir',
+      loading: 'Membaca suapan kerja awam…',
+      error: 'Sumber langsung tidak dapat dihubungi sebentar tadi. Isyarat bersumber di bawah masih berfungsi; tiada angka rekaan menggantikannya.',
+      refresh: 'Muat semula',
+      refreshing: 'Memuat semula',
+      chartTitle: 'Sebutan setiap minggu · kemahiran paling dicari',
+      lastWeeks: '4 minggu terakhir',
+      note: 'Sebutan setiap kemahiran dalam iklan kerja awam terkini, dikumpul mengikut minggu. Ini seluruh suapan, bukan senarai pendek peranan kami — ia menunjukkan arah, bukan jumlah kekosongan Malaysia, dan bukan ramalan untuk individu.',
+      postings: 'iklan kerja dari',
+      days: 'hari terakhir',
+      fetched: 'diambil',
+      source: 'sumber',
+      mentionsOf: 'sebutan',
+    },
+    signals: {
+      badge: 'Snapshot bersumber · bukan suapan langsung',
+      contextTitle: 'Konteks, bukan kepastian',
+      contextBody: 'Angka ini ialah snapshot bersumber, bukan kemas kini masa nyata atau ramalan. Data buruh boleh lambat, berbeza mengikut geografi, dan menggambarkan kumpulan luas bukan hasil individu. Buka setiap sumber untuk meneliti metodologi asal.',
+      reviewed: 'Pautan sumber disemak 21 Okt 2026 · setiap kad menunjukkan tempoh atau tarikh terbitan sumbernya',
+      all: 'Semua isyarat',
+      search: 'Cari isyarat',
+      snapshot: 'Snapshot',
+      liveSource: 'Sumber ditanda langsung',
+      reportedValue: 'Nilai dilaporkan',
+      period: 'Tempoh',
+      sourceNote: 'Nota sumber',
+      originalSource: 'Sumber asal',
+      shown: 'dipaparkan',
+      snapshots: 'snapshot',
+      notLive: 'Tiada satu pun patut dibaca sebagai suapan langsung',
+      noSignalsTitle: 'Belum ada isyarat pasaran',
+      noSignalsBody: 'Penunjuk bersumber akan muncul di sini apabila tersedia.',
+      noViewTitle: 'Tiada isyarat dalam paparan ini',
+      noViewBody: 'Cuba kategori atau frasa carian lain.',
+      categoryMap: { 'Role demand': 'Permintaan peranan', 'Skills outlook': 'Prospek kemahiran' },
     },
     plan: {
       verifiedFor: 'Pelan disahkan untuk',
