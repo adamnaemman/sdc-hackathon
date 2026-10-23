@@ -173,8 +173,15 @@ function Metric({ label, value, caption, icon: Icon }: { label: string; value: s
 function Dashboard() {
   const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends } = useApp();
   const [search, setSearch] = useState('');
+  const [showAllRoles, setShowAllRoles] = useState(false);
   const ordered = useMemo(() => [...roles].sort((a, b) => scores(b) - scores(a)), [roles, scores]);
-  const filtered = ordered.filter((r) => `${r.title} ${r.sector} ${r.summary}`.toLowerCase().includes(search.toLowerCase()));
+  // Only roles that fall inside the sectors this person chose to explore.
+  // If nothing matches (or they chose none), we show everything rather than an
+  // empty page — and the toggle below makes the filter reversible.
+  const sectorMatches = useMemo(() => ordered.filter((role) => profile.targetSectors.some((sector) => normalize(role.sector).includes(normalize(sector)) || normalize(sector).includes(normalize(role.sector)))), [ordered, profile.targetSectors]);
+  const inMySectors = profile.targetSectors.length > 0 && sectorMatches.length > 0 && !showAllRoles;
+  const related = inMySectors ? sectorMatches : ordered;
+  const filtered = related.filter((r) => `${r.title} ${r.sector} ${r.summary}`.toLowerCase().includes(search.toLowerCase()));
   if (loadingRoles) return <><PageHeading eyebrow="Role explorer" title="Your next chapter, in view." description="Compare roles through the strengths you already carry and the skills you can build next."/><LoadingState label="roles"/></>;
   if (rolesError) return <><PageHeading eyebrow="Role explorer" title="Your next chapter, in view." description="Compare roles through the strengths you already carry and the skills you can build next."/><ErrorState label="roles" retry={refetchRoles}/></>;
   return <div className="page-enter">
@@ -198,7 +205,7 @@ function Dashboard() {
       </div>
     </Card>
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div><h2 className="font-display text-[20px] font-bold tracking-[-.04em]">Roles worth exploring</h2><p className="mt-1 text-[11px] text-muted-foreground">Fit blends transferable strengths, goals, and experience.</p></div>
+      <div><h2 className="font-display text-[20px] font-bold tracking-[-.04em]">{inMySectors ? 'Roles in the sectors you chose' : 'Roles worth exploring'}</h2><p className="mt-1 text-[11px] text-muted-foreground">{inMySectors ? <>Filtered to <span className="font-semibold text-foreground">{profile.targetSectors.join(', ')}</span> · {sectorMatches.length} of {ordered.length} roles. <button type="button" onClick={() => setShowAllRoles(true)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-show-all-roles">Show every role</button></> : profile.targetSectors.length > 0 ? <>Showing all {ordered.length} roles. <button type="button" onClick={() => setShowAllRoles(false)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-only-my-sectors">Only my sectors</button></> : 'Fit blends transferable strengths, goals, and experience. Add target sectors in your profile to narrow this list.'}</p></div>
       <label className="relative block w-full sm:w-[230px]"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search roles or sectors" className="focus-ring h-10 w-full rounded-xl border border-border bg-card pl-9 pr-3 text-[11px] outline-none" aria-label="Search roles" data-testid="input-search-roles"/></label>
     </div>
     {filtered.length === 0 ? <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center" data-testid="empty-roles"><div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-secondary"><Search size={18}/></div><div className="font-semibold">No role matches that search</div><p className="mt-1 text-xs text-muted-foreground">Try a different title or sector.</p><button onClick={() => setSearch('')} className="mt-4 text-xs font-semibold text-primary underline underline-offset-4" data-testid="button-clear-search">Clear search</button></div> :
