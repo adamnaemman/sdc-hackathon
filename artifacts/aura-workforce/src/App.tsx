@@ -16,7 +16,6 @@ import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
 import { LiveTrendStrip } from '@/components/live-trend-strip';
 import { AiPlanCard } from '@/components/ai-plan-card';
 import { ExploreRoles } from '@/components/explore-roles';
-import { LibraryExplorer } from '@/components/library-explorer';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
 
@@ -280,7 +279,6 @@ function Dashboard() {
   if (rolesError) return <><PageHeading eyebrow="Role explorer" title="Your next chapter, in view." description="Compare roles through the strengths you already carry and the skills you can build next."/><ErrorState label="roles" retry={refetchRoles}/></>;
   return <div className="page-enter">
      <PageHeading eyebrow="Role explorer · 01" title={<>A next step that starts<br className="hidden sm:block"/> with what you know.</>} description="Ranked for the profile you entered: your skills, your target sectors and your years of experience. Roles you do not match are shown further down, not hidden — you decide what is worth exploring." right={<div className="rounded-xl border border-border bg-card px-3 py-2 text-right"><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">Your profile · current role</div><div className="mt-1 text-[12px] font-semibold" data-testid="text-current-role">{profile.currentRole || 'Add your role in profile'}</div></div>}/>
-    <LiveTrendStrip snapshot={trends} roles={roles} isLoading={trendsLoading} isError={trendsError} isRefreshing={trendsRefreshing} onRefresh={refreshTrends}/>
     <Card className="mb-7 overflow-hidden border-primary/10 bg-primary text-primary-foreground" testId="card-transition-context">
       <div className="surface-grid grid gap-7 p-5 sm:p-7 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
         <div><div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-primary-foreground/65"><Sparkles size={14}/>A practical starting point</div><h2 className="font-display mt-3 max-w-xl text-[23px] font-semibold leading-tight tracking-[-.04em] sm:text-[27px]">Your people skills have more than one place to go.</h2><p className="mt-2 max-w-lg text-[12px] leading-relaxed text-primary-foreground/68">Compare fit signals, training effort, and local market evidence. You can adjust your profile at any time.</p>
@@ -319,13 +317,6 @@ function Dashboard() {
         <p className="mt-3 border-t border-border pt-2 text-[8px] leading-relaxed text-muted-foreground">Check it yourself: {role.occupationSource}</p>
       </article>)}</div>
     </section> : null}
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div><h2 className="font-display text-[20px] font-bold tracking-[-.04em]">{inMySectors ? 'Curated roles in the sectors you chose' : 'Curated roles, with verified pathways'}</h2><p className="mt-1 text-[11px] text-muted-foreground">{inMySectors ? <>Filtered to <span className="font-semibold text-foreground">{profile.targetSectors.join(', ')}</span> · {sectorMatches.length} of {ordered.length} roles. <button type="button" onClick={() => setShowAllRoles(true)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-show-all-roles">Show every role</button></> : profile.targetSectors.length > 0 ? <>Showing all {ordered.length} curated roles. <button type="button" onClick={() => setShowAllRoles(false)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-only-my-sectors">Only my sectors</button></> : 'Five roles have a full pathway with course links and hours. Everything else below is a direction to research.'}</p></div>
-      <label className="relative block w-full sm:w-[230px]"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search roles or sectors" className="focus-ring h-10 w-full rounded-xl border border-border bg-card pl-9 pr-3 text-[11px] outline-none" aria-label="Search roles" data-testid="input-search-roles"/></label>
-    </div>
-    {filtered.length === 0 ? <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center" data-testid="empty-roles"><div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-secondary"><Search size={18}/></div><div className="font-semibold">No role matches that search</div><p className="mt-1 text-xs text-muted-foreground">Try a different title or sector.</p><button onClick={() => setSearch('')} className="mt-4 text-xs font-semibold text-primary underline underline-offset-4" data-testid="button-clear-search">Clear search</button></div> :
-       <div className="grid gap-4 xl:grid-cols-2" data-testid="list-role-comparisons">{filtered.map((role, index) => <RoleCard key={role.id} role={role} profile={profile} rank={index + 1} score={scores(role)} urgency={urgency(role)} aiReason={plan?.ranking.find((entry) => entry.roleId === role.id)?.reason} onSelect={() => setSelectedRoleId(role.id)}/>)}</div>}
-    <LibraryExplorer skills={profile.skills}/>
     <div className="mt-5 flex items-start gap-3 rounded-xl border border-border/70 bg-secondary/45 p-4 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-fit-caveat"><CircleHelp size={15} className="mt-0.5 shrink-0 text-primary"/><p><strong className="text-foreground">How to read these scores:</strong> Fit and transition urgency are directional estimates based on the profile you entered and role data. They are not hiring probabilities, performance ratings, or predictions. Speak with a counselor to add local context.</p></div>
   </div>;
 }
@@ -568,7 +559,7 @@ function PathwayPage() {
 function EmptyState({ title, description, icon }: { title: string; description: string; icon: ReactNode }) { return <div className="rounded-2xl border border-dashed border-border bg-card/55 px-6 py-12 text-center" data-testid="state-empty"><div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-primary">{icon}</div><div className="font-display text-[17px] font-bold">{title}</div><p className="mx-auto mt-1 max-w-md text-[11px] text-muted-foreground">{description}</p></div>; }
 
 function SignalsPage() {
-  const { signals, loadingSignals, signalsError, refetchSignals } = useApp();
+  const { signals, loadingSignals, signalsError, refetchSignals, roles, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends } = useApp();
   const [category, setCategory] = useState('All signals');
   const [query, setQuery] = useState('');
   const categories = ['All signals', ...Array.from(new Set(signals.map((signal) => signal.category).filter(Boolean)))];
@@ -576,6 +567,7 @@ function SignalsPage() {
   const publishedDate = (date: string) => { const parsed = new Date(date); return Number.isNaN(parsed.valueOf()) ? date : new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(parsed); };
   return <div className="page-enter">
     <PageHeading eyebrow="Market signals · 04" title="Evidence, with its sources attached." description="A small set of labor-market signals to add context to your exploration. Read the geography, date, and source note before drawing conclusions." right={<div className="flex items-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-3 py-2 text-[9px] font-semibold text-foreground"><span className="h-1.5 w-1.5 rounded-full bg-accent"/>Sourced snapshots · not a live feed</div>}/>
+     <LiveTrendStrip snapshot={trends} roles={roles} isLoading={trendsLoading} isError={trendsError} isRefreshing={trendsRefreshing} onRefresh={refreshTrends}/>
      <Card className="mb-3 border-primary/10 bg-secondary/40" testId="card-signal-caveat"><div className="flex gap-3 p-4 sm:p-5"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary"><FileText size={17}/></div><div><div className="text-[11px] font-semibold">Context, not certainty</div><p className="mt-1 max-w-4xl text-[10px] leading-relaxed text-muted-foreground">These figures are sourced snapshots, not real-time updates or forecasts. Labor data can lag, vary by geography, and describe broad groups rather than individual outcomes. Open each source to review the original methodology.</p></div></div></Card>
      <p className="mb-5 font-mono-ui text-[9px] text-muted-foreground" data-testid="text-signal-review-date">Source links reviewed 21 Oct 2026 · each card shows its source period or publication date</p>
     {loadingSignals ? <LoadingState label="signals"/> : signalsError ? <ErrorState label="signals" retry={refetchSignals}/> : <>
