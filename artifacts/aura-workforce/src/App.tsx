@@ -18,6 +18,7 @@ import { AiPlanCard } from '@/components/ai-plan-card';
 import { FutureRolesSection } from '@/components/future-roles-section';
 import { LearningPathSection } from '@/components/learning-path-section';
 import { HeroSection } from '@/components/hero-section';
+import { AboutPage } from '@/components/about-page';
 import { SettingsProvider, SettingsControls, useSettings } from '@/lib/settings';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
@@ -273,6 +274,11 @@ function WorkspaceShell() {
           <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold">{t.nav[key]}</span><span className="mt-0.5 block text-[10px] text-sidebar-foreground/45">{t.navDetail[key]}</span></span>
         </a>)}
       </nav>
+      <div className="px-3 pt-2">
+        <Link href="/about" onClick={() => setMobileNav(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[11px] text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid="link-about">
+          <CircleHelp size={15}/> About this project
+        </Link>
+      </div>
       <div className="mt-auto px-4 pb-5">
         <div className="privacy-note rounded-2xl border border-sidebar-foreground/10 bg-sidebar-foreground/[.035] p-4">
           <div className="flex items-center gap-2 text-[11px] font-semibold"><ShieldCheck size={15} className="text-sidebar-primary"/>Private by design</div>
@@ -292,12 +298,14 @@ function WorkspaceShell() {
       </header>
       <main className="mx-auto w-full max-w-[1500px] px-4 sm:px-7 lg:px-10">
         <ErrorBoundary>
+          {location === '/about' ? <AboutPage/> : <>
           <HeroSection/>
 
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
           <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
           <FutureRolesSection explored={explored} exploredLoading={exploredLoading} onBuildPathway={buildPathwayFor} pathwayLoading={pathwayLoading} pathwayRoleTitle={pathwayRoleTitle}/>
           <LearningPathSection verified={exploredPathway} pathwayLoading={pathwayLoading} pathwayError={pathwayError} weeklyHours={profile.weeklyHours}/>
+          </>}
         </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">
           <span>{t.footer.left}</span><span className="font-mono-ui tracking-[.08em]">{t.footer.right}</span>
