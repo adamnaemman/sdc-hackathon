@@ -19,6 +19,7 @@ import { FutureRolesSection } from '@/components/future-roles-section';
 import { LearningPathSection } from '@/components/learning-path-section';
 import { HeroSection } from '@/components/hero-section';
 import { AboutPage } from '@/components/about-page';
+import { WelcomeDialog } from '@/components/welcome-dialog';
 import { SettingsProvider, SettingsControls, useSettings } from '@/lib/settings';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
@@ -299,6 +300,7 @@ function WorkspaceShell() {
       <main className="mx-auto w-full max-w-[1500px] px-4 sm:px-7 lg:px-10">
         <ErrorBoundary>
           {location === '/about' ? <AboutPage/> : <>
+          <WelcomeDialog/>
           <HeroSection/>
 
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>

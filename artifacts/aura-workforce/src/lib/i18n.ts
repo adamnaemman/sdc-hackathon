@@ -44,6 +44,15 @@ type Copy = {
     built: string;
     disclaimer: string;
   };
+  welcome: {
+    label: string;
+    title: string;
+    sub: string;
+    items: string[];
+    privacy: string;
+    start: string;
+    never: string;
+  };
 };
 
 export const copy: Record<Lang, Copy> = {
@@ -96,6 +105,20 @@ export const copy: Record<Lang, Copy> = {
         'React 19, Vite, Tailwind CSS 4, TanStack Query, Wouter, Express 5, Zod, OpenAPI with Orval, TypeScript, pnpm workspaces. Hosted on Replit. Language model: DeepSeek (declared in the submission).',
       disclaimer: 'Directional estimates only. Your experience and judgement lead the way.',
     },
+    welcome: {
+      label: 'New here',
+      title: 'Welcome to AURA-Workforce',
+      sub: 'One page, four checkpoints. Here is what each one does.',
+      items: [
+        '01 · Market signals — live demand from real job postings, with the source and date attached.',
+        '02 · Your profile — the AI expands what you write into concrete skills you choose.',
+        '03 · Future roles — occupations chosen from your profile, not from a fixed catalogue.',
+        '04 · Learning path — a plan fitted to your weekly hours, with verified course links.',
+      ],
+      privacy: 'No account, no CV, nothing stored. Your profile stays in this browser.',
+      start: 'Start',
+      never: "Don't show this again",
+    },
   },
   bm: {
     nav: { signals: '01 · Isyarat pasaran', profile: '02 · Profil anda', roles: '03 · Peranan masa depan', pathway: '04 · Laluan belajar' },
@@ -145,6 +168,20 @@ export const copy: Record<Lang, Copy> = {
       built:
         'React 19, Vite, Tailwind CSS 4, TanStack Query, Wouter, Express 5, Zod, OpenAPI dengan Orval, TypeScript, pnpm workspaces. Dihoskan di Replit. Model bahasa: DeepSeek (diisytiharkan dalam submission).',
       disclaimer: 'Anggaran berarah sahaja. Pengalaman dan pertimbangan anda yang mendahului.',
+    },
+    welcome: {
+      label: 'Baharu di sini',
+      title: 'Selamat datang ke AURA-Workforce',
+      sub: 'Satu halaman, empat checkpoint. Ini yang setiap satu lakukan.',
+      items: [
+        '01 · Isyarat pasaran — permintaan langsung daripada iklan kerja sebenar, bersama sumber dan tarikh.',
+        '02 · Profil anda — AI mengembangkan apa yang anda tulis menjadi kemahiran yang anda pilih sendiri.',
+        '03 · Peranan masa depan — pekerjaan dipilih daripada profil anda, bukan katalog tetap.',
+        '04 · Laluan belajar — pelan mengikut jam mingguan anda, dengan pautan kursus yang disahkan.',
+      ],
+      privacy: 'Tiada akaun, tiada CV, tiada simpanan. Profil anda kekal dalam pelayar ini.',
+      start: 'Mula',
+      never: 'Jangan tunjuk lagi',
     },
   },
 };
