@@ -53,6 +53,27 @@ type ExploreResult = {
   model: string;
   generatedAt: string;
 };
+
+type VerifiedStep = {
+  moduleId: string;
+  title: string;
+  skill: string;
+  hours: number;
+  provider: string;
+  url: string;
+  costNote: string;
+  order: number;
+  why: string;
+};
+
+type VerifiedPathway = {
+  roleTitle: string;
+  steps: VerifiedStep[];
+  totalHours: number;
+  note: string;
+  model: string;
+  generatedAt: string;
+};
 type AppContextValue = {
   roles: WorkforceRole[]; signals: MarketSignal[]; loadingRoles: boolean; loadingSignals: boolean;
   rolesError: boolean; signalsError: boolean; refetchRoles: () => void; refetchSignals: () => void;
@@ -63,6 +84,7 @@ type AppContextValue = {
   refreshTrends: () => void;
   plan: AiPlan | null; planLoading: boolean; generatePlan: (input: ProfileData) => Promise<void>;
   explored: ExploreResult | null; exploredLoading: boolean; generateExplore: (input: ProfileData) => Promise<void>;
+  exploredPathway: VerifiedPathway | null; pathwayLoading: boolean; buildPathwayFor: (role: ExploredRole) => Promise<void>;
 };
 const AppContext = createContext<AppContextValue | null>(null);
 const useApp = () => {
@@ -172,6 +194,31 @@ function AppContent() {
       setExploredLoading(false);
     }
   };
+  const [exploredPathway, setExploredPathway] = useState<VerifiedPathway | null>(null);
+  const [pathwayLoading, setPathwayLoading] = useState(false);
+  // Builds a pathway for an AI-proposed occupation. The model may only choose
+  // courses from our verified library, so every step has a real URL.
+  const buildPathwayFor = async (role: ExploredRole) => {
+    setPathwayLoading(true);
+    try {
+      const response = await fetch('/api/pathway', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          roleTitle: role.title,
+          skillsToBuild: role.skillsToBuild,
+          profileSummary: `${profile.currentRole} in ${profile.industry}, ${profile.yearsExperience} years of experience. Current skills: ${profile.skills.join(', ')}.`,
+        }),
+      });
+      if (!response.ok) return;
+      setExploredPathway((await response.json()) as VerifiedPathway);
+      document.getElementById('pathway')?.scrollIntoView({ behavior: 'smooth' });
+    } catch {
+      // The curated plan below remains available.
+    } finally {
+      setPathwayLoading(false);
+    }
+  };
   const value: AppContextValue = {
     roles, signals, loadingRoles: rolesQuery.isLoading, loadingSignals: signalsQuery.isLoading,
     rolesError: !!rolesQuery.error, signalsError: !!signalsQuery.error,
@@ -183,6 +230,7 @@ function AppContent() {
     trendsRefreshing: refreshingTrends, refreshTrends,
     plan, planLoading, generatePlan,
     explored, exploredLoading, generateExplore,
+    exploredPathway, pathwayLoading, buildPathwayFor,
   };
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
@@ -194,7 +242,7 @@ function outlookMetric(role: WorkforceRole) {
 }
 
 function WorkspaceShell() {
-  const { plan, planLoading, explored, exploredLoading, profile } = useApp();
+  const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, buildPathwayFor, profile } = useApp();
   const [location] = useLocation();
   const [mobileNav, setMobileNav] = useState(false);
   const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
@@ -240,8 +288,8 @@ function WorkspaceShell() {
 
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
           <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
-          <FutureRolesSection explored={explored} exploredLoading={exploredLoading}/>
-          <LearningPathSection plan={plan} planLoading={planLoading} weeklyHours={profile.weeklyHours}/>
+          <FutureRolesSection explored={explored} exploredLoading={exploredLoading} onBuildPathway={buildPathwayFor} pathwayLoading={pathwayLoading}/>
+          <LearningPathSection plan={plan} planLoading={planLoading} verified={exploredPathway} pathwayLoading={pathwayLoading} weeklyHours={profile.weeklyHours}/>
         </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">
           <span>Directional estimates only. Your experience and judgment lead the way.</span><span className="font-mono-ui tracking-[.08em]">AURA · PRIVACY-FIRST PLANNING</span>

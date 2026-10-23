@@ -32,9 +32,11 @@ type ExploreResult = {
 type FutureRolesSectionProps = {
   explored: ExploreResult | null;
   exploredLoading: boolean;
+  onBuildPathway?: (role: ExploredRole) => void;
+  pathwayLoading?: boolean;
 };
 
-export function FutureRolesSection({ explored, exploredLoading }: FutureRolesSectionProps) {
+export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, pathwayLoading }: FutureRolesSectionProps) {
   const roles = explored?.roles ?? [];
 
   return (
@@ -134,6 +136,18 @@ export function FutureRolesSection({ explored, exploredLoading }: FutureRolesSec
                 <p className="mt-auto border-t border-border pt-2 text-[8px] leading-relaxed text-muted-foreground">
                   Check it yourself: {role.occupationSource}
                 </p>
+                {onBuildPathway ? (
+                  <button
+                    type="button"
+                    onClick={() => onBuildPathway(role)}
+                    disabled={pathwayLoading}
+                    className="focus-ring mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[9px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    data-testid={`button-pathway-${role.title}`}
+                  >
+                    <Sparkles size={11} />
+                    {pathwayLoading ? 'Building pathway…' : 'Build verified pathway'}
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>

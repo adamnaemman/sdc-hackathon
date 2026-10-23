@@ -1,14 +1,18 @@
 /**
  * CHECKPOINT 4 — LEARNING PATH
  * ============================
- * The study plan the model ordered for this person, fitted to the hours they
- * said they actually have each week.
+ * Two sources, one screen:
  *
- * The model chooses the order and writes the reason for each step; the hours and
- * the titles come from the curated catalogue, so the numbers are not invented.
+ *  1. A verified pathway built for an AI-proposed occupation (preferred). Every
+ *     step links to a course URL that was fetched and checked in advance; the
+ *     model only chose and ordered them.
+ *  2. Fallback: the plan's pathway for the closest curated role.
+ *
+ * The total time is always divided by the hours the person said they actually
+ * have each week, so the plan is a schedule, not a wish.
  */
 
-import { ArrowUpRight, CalendarDays, Clock3 } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Clock3, ExternalLink } from 'lucide-react';
 
 type PathwayStep = {
   moduleId: string;
@@ -16,6 +20,8 @@ type PathwayStep = {
   order: number;
   hours: number;
   why: string;
+  provider?: string;
+  url?: string;
 };
 
 type Plan = {
@@ -26,17 +32,57 @@ type Plan = {
   model: string;
 };
 
+type VerifiedPathway = {
+  roleTitle: string;
+  steps: Array<{
+    moduleId: string;
+    title: string;
+    skill: string;
+    hours: number;
+    provider: string;
+    url: string;
+    costNote: string;
+    order: number;
+    why: string;
+  }>;
+  totalHours: number;
+  note: string;
+  model: string;
+  generatedAt: string;
+};
+
 type LearningPathSectionProps = {
   plan: Plan | null;
   planLoading: boolean;
+  verified: VerifiedPathway | null;
+  pathwayLoading: boolean;
   weeklyHours: number;
 };
 
-export function LearningPathSection({ plan, planLoading, weeklyHours }: LearningPathSectionProps) {
-  const steps = plan?.pathway ?? [];
-  const totalHours = steps.reduce((sum, step) => sum + Number(step.hours || 0), 0);
+export function LearningPathSection({
+  plan,
+  planLoading,
+  verified,
+  pathwayLoading,
+  weeklyHours,
+}: LearningPathSectionProps) {
+  const verifiedSteps: PathwayStep[] = (verified?.steps ?? []).map((step) => ({
+    moduleId: step.moduleId,
+    title: step.title,
+    order: step.order,
+    hours: step.hours,
+    why: step.why,
+    provider: step.provider,
+    url: step.url,
+  }));
+
+  const usingVerified = verifiedSteps.length > 0;
+  const steps: PathwayStep[] = usingVerified ? verifiedSteps : plan?.pathway ?? [];
+  const roleTitle = usingVerified ? verified?.roleTitle : plan?.recommendedRoleTitle;
+  const totalHours = usingVerified ? verified?.totalHours ?? 0 : steps.reduce((sum, step) => sum + Number(step.hours || 0), 0);
   const hoursPerWeek = Math.max(1, weeklyHours);
   const totalWeeks = Math.max(1, Math.ceil(totalHours / hoursPerWeek));
+  const busy = planLoading || pathwayLoading;
 
   return (
     <section id="pathway" className="scroll-mt-24 border-t border-border py-10">
@@ -48,12 +94,12 @@ export function LearningPathSection({ plan, planLoading, weeklyHours }: Learning
           A plan built around the hours you actually have.
         </h2>
         <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
-          The model orders the steps and explains each one. Hours and titles come from our catalogue, so
-          nothing here is a made-up course.
+          Every step below links to a course page we checked before shipping. The model chose the order and
+          wrote the reason — it cannot invent a course.
         </p>
       </div>
 
-      {planLoading ? (
+      {busy ? (
         <div className="rounded-2xl border border-border bg-card p-6" role="status">
           <div className="h-3 w-40 animate-pulse rounded bg-muted" />
           <div className="mt-3 h-3 w-full animate-pulse rounded bg-muted" />
@@ -61,16 +107,16 @@ export function LearningPathSection({ plan, planLoading, weeklyHours }: Learning
         </div>
       ) : null}
 
-      {!planLoading && steps.length === 0 ? (
+      {!busy && steps.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center" data-testid="learning-path-empty">
           <CalendarDays size={20} className="mx-auto text-primary" />
           <p className="font-display mt-3 text-[17px] font-bold">No plan yet</p>
           <p className="mx-auto mt-1 max-w-md text-[11px] leading-relaxed text-muted-foreground">
-            The study plan is generated together with your future roles. Fill in your profile, then press
-            Apply — and it will appear here, fitted to your weekly hours.
+            Choose one of the roles in checkpoint 03 and press <span className="font-semibold">Build verified pathway</span> —
+            the plan appears here, fitted to your weekly hours.
           </p>
-          <a href="#profile" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground">
-            Go to your profile <ArrowUpRight size={12} />
+          <a href="#roles" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground">
+            Go to checkpoint 03 <ArrowUpRight size={12} />
           </a>
         </div>
       ) : null}
@@ -96,6 +142,17 @@ export function LearningPathSection({ plan, planLoading, weeklyHours }: Learning
                       </span>
                     </div>
                     <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">{step.why}</p>
+                    {step.url ? (
+                      <a
+                        href={step.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-2 inline-flex items-center gap-1.5 text-[9px] font-semibold text-primary underline underline-offset-2"
+                        data-testid={`link-step-${step.moduleId}`}
+                      >
+                        {step.provider ?? 'Course'} <ExternalLink size={10} />
+                      </a>
+                    ) : null}
                   </div>
                 </li>
               );
@@ -103,8 +160,10 @@ export function LearningPathSection({ plan, planLoading, weeklyHours }: Learning
           </ol>
 
           <aside className="h-fit rounded-2xl bg-primary p-5 text-primary-foreground lg:sticky lg:top-24">
-            <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">PLAN FOR</div>
-            <div className="font-display mt-1 text-[18px] font-bold tracking-[-.03em]">{plan?.recommendedRoleTitle}</div>
+            <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">
+              {usingVerified ? 'VERIFIED PLAN FOR' : 'PLAN FOR'}
+            </div>
+            <div className="font-display mt-1 text-[18px] font-bold tracking-[-.03em]">{roleTitle}</div>
 
             <div className="mt-4 space-y-3 border-t border-primary-foreground/15 pt-4">
               <div className="flex items-center gap-2">
@@ -123,14 +182,18 @@ export function LearningPathSection({ plan, planLoading, weeklyHours }: Learning
               </div>
             </div>
 
-            {plan?.nextAction ? (
+            {usingVerified && verified?.note ? (
+              <p className="mt-4 border-t border-primary-foreground/15 pt-3 text-[9px] leading-relaxed text-primary-foreground/70">{verified.note}</p>
+            ) : null}
+
+            {!usingVerified && plan?.nextAction ? (
               <p className="mt-4 border-t border-primary-foreground/15 pt-3 text-[10px] leading-relaxed text-primary-foreground/80">
                 <span className="font-semibold text-primary-foreground">Next step: </span>{plan.nextAction}
               </p>
             ) : null}
 
             <p className="mt-3 text-[9px] leading-relaxed text-primary-foreground/55">
-              {plan?.caveat || 'Directional guidance only. Confirm course details with the provider.'}
+              {usingVerified ? 'Course links verified before publishing. Confirm availability with the provider.' : plan?.caveat || 'Directional guidance only.'}
             </p>
           </aside>
         </div>
