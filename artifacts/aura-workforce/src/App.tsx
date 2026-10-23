@@ -15,6 +15,8 @@ import { useHealthCheck, useListMarketSignals, useListWorkforceRoles } from '@wo
 import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
 import { LiveTrendStrip } from '@/components/live-trend-strip';
 import { AiPlanCard } from '@/components/ai-plan-card';
+import { FutureRolesSection } from '@/components/future-roles-section';
+import { LearningPathSection } from '@/components/learning-path-section';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
@@ -76,10 +78,10 @@ const initialProfile: ProfileData = {
   weeklyHours: 6,
 };
 const navItems = [
-  { href: '/', label: 'Role explorer', icon: Compass, detail: 'Compare next steps' },
-  { href: '/profile', label: 'Your profile', icon: Users, detail: 'Strengths & goals' },
-  { href: '/pathway', label: 'Learning pathway', icon: BookOpen, detail: 'Build your plan' },
-  { href: '/signals', label: 'Market signals', icon: Activity, detail: 'Evidence & sources' },
+  { href: '#signals', label: '01 · Market signals', icon: Activity, detail: 'Evidence & sources' },
+  { href: '#profile', label: '02 · Your profile', icon: Users, detail: 'Strengths & goals' },
+  { href: '#roles', label: '03 · Future roles', icon: Compass, detail: 'Chosen by the AI' },
+  { href: '#pathway', label: '04 · Learning path', icon: BookOpen, detail: 'Your study plan' },
 ];
 
 function App() {
@@ -192,6 +194,7 @@ function outlookMetric(role: WorkforceRole) {
 }
 
 function WorkspaceShell() {
+  const { plan, planLoading, explored, exploredLoading, profile } = useApp();
   const [location] = useLocation();
   const [mobileNav, setMobileNav] = useState(false);
   const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
@@ -204,11 +207,10 @@ function WorkspaceShell() {
       </div>
       <div className="px-5 pb-3 font-mono-ui text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/45">Your workspace</div>
       <nav className="flex flex-col gap-1 px-3" aria-label="Main navigation">
-        {navItems.map(({ href, label, icon: Icon, detail }) => <Link key={href} href={href} onClick={() => setMobileNav(false)} className={`nav-link group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${location === href ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`} data-testid={`link-${href === '/' ? 'role-explorer' : href.slice(1)}`}>
-          <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${location === href ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'bg-sidebar-foreground/5'}`}><Icon size={17}/></span>
+        {navItems.map(({ href, label, icon: Icon, detail }) => <a key={href} href={href} onClick={() => setMobileNav(false)} className="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid={`link-${href.slice(1)}`}>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-foreground/5"><Icon size={17}/></span>
           <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold">{label}</span><span className="mt-0.5 block text-[10px] text-sidebar-foreground/45">{detail}</span></span>
-          {location === href && <span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary"/>}
-        </Link>)}
+        </a>)}
       </nav>
       <div className="mt-auto px-4 pb-5">
         <div className="privacy-note rounded-2xl border border-sidebar-foreground/10 bg-sidebar-foreground/[.035] p-4">
@@ -227,16 +229,20 @@ function WorkspaceShell() {
         </div>
         <div className="flex items-center gap-3"><span className="hidden text-[11px] text-muted-foreground sm:inline">A guide, not a verdict</span><div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-bold" data-testid="text-session-profile">P</div></div>
       </header>
-      <main className="mx-auto w-full max-w-[1500px] px-4 py-7 sm:px-7 sm:py-9 lg:px-10">
-        <RoutedErrorBoundary key={location}>
-          <Switch>
-            <Route path="/" component={Dashboard}/>
-            <Route path="/profile" component={ProfilePage}/>
-            <Route path="/pathway" component={PathwayPage}/>
-            <Route path="/signals" component={SignalsPage}/>
-            <Route component={NotFound}/>
-          </Switch>
-        </RoutedErrorBoundary>
+      <main className="mx-auto w-full max-w-[1500px] px-4 sm:px-7 lg:px-10">
+        <ErrorBoundary>
+          <section className="page-enter pb-4 pt-10 sm:pt-14">
+            <div className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.19em] text-muted-foreground"><span className="h-px w-5 bg-accent"/>A guide, not a verdict</div>
+            <h1 className="font-display max-w-4xl text-[38px] font-bold leading-[1.05] tracking-[-.06em] sm:text-[54px]">From who you are today,<br/>to what you learn next.</h1>
+            <p className="mt-4 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">Four checkpoints: the market evidence, your profile, the roles the AI concludes fit you, and a study plan built around the hours you actually have. Every claim carries a source and a date.</p>
+            <a href="#signals" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[11px] font-semibold text-primary-foreground">Start with checkpoint 01 <ArrowRight size={14}/></a>
+          </section>
+
+          <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
+          <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
+          <FutureRolesSection plan={plan} explored={explored} planLoading={planLoading} exploredLoading={exploredLoading}/>
+          <LearningPathSection plan={plan} planLoading={planLoading} weeklyHours={profile.weeklyHours}/>
+        </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">
           <span>Directional estimates only. Your experience and judgment lead the way.</span><span className="font-mono-ui tracking-[.08em]">AURA · PRIVACY-FIRST PLANNING</span>
         </footer>
@@ -468,7 +474,7 @@ function ProfilePage() {
     if (step < 3) setStep(step + 1);
   };
   return <div className="page-enter">
-     <PageHeading eyebrow="Your profile · 02" title="Name what you already bring." description="A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends." right={<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="text-primary"/>Not saved to an account</div>}/>
+     <PageHeading eyebrow="Checkpoint 02 · Your profile" title="Name what you already bring." description="A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends." right={<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="text-primary"/>Not saved to an account</div>}/>
     <div className="grid gap-7 lg:grid-cols-[250px_1fr]">
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <div className="rounded-2xl bg-primary p-5 text-primary-foreground">
@@ -517,12 +523,10 @@ function ProfilePage() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
           <div className="flex items-center gap-3">{saved && <span className="flex items-center gap-1 text-[10px] text-primary" data-testid="status-profile-updated"><CheckCircle2 size={13}/>Updated for this session</span>}
-            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void Promise.all([generatePlan(draft), generateExplore(draft)]).then(() => navigate('/')); }} disabled={planLoading || exploredLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{planLoading || exploredLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
+            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void Promise.all([generatePlan(draft), generateExplore(draft)]).then(() => { document.getElementById('roles')?.scrollIntoView({ behavior: 'smooth' }); }); }} disabled={planLoading || exploredLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{planLoading || exploredLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
         </div>
       </Card>
     </div>
-    <AiPlanCard roles={roles} profile={draft} mode={mode}/>
-    <ExploreRoles profile={draft}/>
   </div>;
 }
 function Field({ label, hint, children }: { label: string; hint: string; children: ReactNode }) { return <label className="block"><span className="text-[11px] font-semibold">{label}</span><span className="mt-1 block text-[9px] text-muted-foreground">{hint}</span><div className="mt-2">{children}</div></label>; }
@@ -566,7 +570,7 @@ function SignalsPage() {
   const visible = signals.filter((signal) => (category === 'All signals' || signal.category === category) && `${signal.title} ${signal.summary} ${signal.sourceName} ${signal.geography}`.toLowerCase().includes(query.toLowerCase()));
   const publishedDate = (date: string) => { const parsed = new Date(date); return Number.isNaN(parsed.valueOf()) ? date : new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(parsed); };
   return <div className="page-enter">
-    <PageHeading eyebrow="Market signals · 04" title="Evidence, with its sources attached." description="A small set of labor-market signals to add context to your exploration. Read the geography, date, and source note before drawing conclusions." right={<div className="flex items-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-3 py-2 text-[9px] font-semibold text-foreground"><span className="h-1.5 w-1.5 rounded-full bg-accent"/>Sourced snapshots · not a live feed</div>}/>
+    <PageHeading eyebrow="Checkpoint 01 · Market signals" title="Evidence, with its sources attached." description="A small set of labor-market signals to add context to your exploration. Read the geography, date, and source note before drawing conclusions." right={<div className="flex items-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-3 py-2 text-[9px] font-semibold text-foreground"><span className="h-1.5 w-1.5 rounded-full bg-accent"/>Sourced snapshots · not a live feed</div>}/>
      <LiveTrendStrip snapshot={trends} roles={roles} isLoading={trendsLoading} isError={trendsError} isRefreshing={trendsRefreshing} onRefresh={refreshTrends}/>
      <Card className="mb-3 border-primary/10 bg-secondary/40" testId="card-signal-caveat"><div className="flex gap-3 p-4 sm:p-5"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary"><FileText size={17}/></div><div><div className="text-[11px] font-semibold">Context, not certainty</div><p className="mt-1 max-w-4xl text-[10px] leading-relaxed text-muted-foreground">These figures are sourced snapshots, not real-time updates or forecasts. Labor data can lag, vary by geography, and describe broad groups rather than individual outcomes. Open each source to review the original methodology.</p></div></div></Card>
      <p className="mb-5 font-mono-ui text-[9px] text-muted-foreground" data-testid="text-signal-review-date">Source links reviewed 21 Oct 2026 · each card shows its source period or publication date</p>
