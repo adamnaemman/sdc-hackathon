@@ -41,6 +41,21 @@ export const ALLOWED_SKILLS = [
   "Documentation",
   "Data analysis",
   "Project coordination",
+  // Added so the vocabulary covers the personas in the domain brief, not just
+  // procurement. Without these a nurse or a designer has nothing relevant to
+  // be suggested, and the AI looks useless even when it is working correctly.
+  "Clinical documentation",
+  "Patient coordination",
+  "Shift scheduling",
+  "Teaching & facilitation",
+  "Customer support",
+  "Visual design",
+  "Content writing",
+  "Report writing",
+  "Quality assurance",
+  "Logistics coordination",
+  "Cash handling",
+  "Recruitment support",
 ] as const;
 
 export const ALLOWED_COMPETENCIES = [
@@ -53,6 +68,9 @@ export const ALLOWED_COMPETENCIES = [
   "Organization",
   "Decision making",
   "Collaboration",
+  "Problem solving",
+  "Time management",
+  "Leadership",
 ] as const;
 
 export type ExtractedProfile = {

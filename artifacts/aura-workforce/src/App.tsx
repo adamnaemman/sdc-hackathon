@@ -238,11 +238,12 @@ function ProfilePage() {
   const steps = ['Starting point', 'Your strengths', 'Where to next', 'Time to learn'];
   const update = (field: keyof ProfileData, value: string | number | string[]) => { setDraft((current) => ({ ...current, [field]: value })); setSaved(false); };
   const toggleList = (field: 'skills'|'competencies'|'targetSectors', value: string) => update(field, draft[field].includes(value) ? draft[field].filter((v) => v !== value) : [...draft[field], value]);
-   const skills = ['Vendor communication','Manual PO processing','Microsoft Excel','Inventory auditing','Procurement','Supplier coordination','Data entry','Inventory management','Process mapping','Documentation','Data analysis','Project coordination'];
-   const competencies = ['Communication','Adaptability','Coaching','Reliability','Empathy','Attention to detail','Organization','Decision making','Collaboration'];
+   const skills = ['Vendor communication','Manual PO processing','Microsoft Excel','Inventory auditing','Procurement','Supplier coordination','Data entry','Inventory management','Process mapping','Documentation','Data analysis','Project coordination','Clinical documentation','Patient coordination','Shift scheduling','Teaching & facilitation','Customer support','Visual design','Content writing','Report writing','Quality assurance','Logistics coordination','Cash handling','Recruitment support'];
+   const competencies = ['Communication','Adaptability','Coaching','Reliability','Empathy','Attention to detail','Organization','Decision making','Collaboration','Problem solving','Time management','Leadership'];
    const sectors = ['Smart logistics','Technology','Healthcare','Education','Public services','Logistics','Clean energy','Financial services','Community services'];
   const [inferring, setInferring] = useState(false);
-  const [skillsSource, setSkillsSource] = useState<'ai' | 'failed' | null>(null);
+  const [skillsSource, setSkillsSource] = useState<'ai' | 'empty' | 'failed' | null>(null);
+  const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
 
   // Step 0 -> 1: the AI turns "role + industry + years" into concrete skills.
   // If the model is unavailable we still advance — a broken model must never
@@ -266,15 +267,32 @@ function ProfilePage() {
           currentRole?: string;
           skills?: string[];
           competencies?: string[];
+          summary?: string;
         };
 
-        next = {
-          ...draft,
-          currentRole: draft.currentRole || suggestion.currentRole || '',
-          skills: suggestion.skills?.length ? Array.from(new Set(suggestion.skills)) : draft.skills,
-          competencies: suggestion.competencies?.length ? Array.from(new Set(suggestion.competencies)) : draft.competencies,
-        };
-        setSkillsSource('ai');
+        const suggestedSkills = suggestion.skills ?? [];
+        const suggestedCompetencies = suggestion.competencies ?? [];
+
+        if (suggestedSkills.length > 0 || suggestedCompetencies.length > 0) {
+          // Replace rather than merge: the previous selection belonged to the
+          // example profile, not to the role the user just described.
+          next = {
+            ...draft,
+            currentRole: draft.currentRole || suggestion.currentRole || '',
+            skills: suggestedSkills.length > 0 ? Array.from(new Set(suggestedSkills)) : draft.skills,
+            competencies:
+              suggestedCompetencies.length > 0
+                ? Array.from(new Set(suggestedCompetencies))
+                : draft.competencies,
+          };
+          setSuggestedSummary(suggestion.summary?.trim() ? suggestion.summary.trim() : null);
+          setSkillsSource('ai');
+        } else {
+          // The model answered, but nothing in its answer matched our vocabulary.
+          // Say that, instead of pretending a suggestion was applied.
+          setSuggestedSummary(null);
+          setSkillsSource('empty');
+        }
       } catch {
         setSkillsSource('failed');
       } finally {
@@ -309,7 +327,8 @@ function ProfilePage() {
           <div className="rounded-xl bg-secondary/50 p-4"><div className="text-[11px] font-semibold">Start where you are</div><p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">A career transition can build on existing knowledge. You do not need to start over to explore something new.</p></div>
         </div>}
         {step === 1 && <div className="space-y-6">
-          {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested">We suggested these skills from your role, industry and experience. Untick anything that does not describe your work.</div>}
+          {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested"><span className="font-semibold">Suggested from your role. </span>{suggestedSummary ? <>{suggestedSummary} </> : null}Untick anything that does not describe your work.</div>}
+          {skillsSource === 'empty' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-empty">We couldn't map that role onto our skill list. Pick the closest options below — your years of experience still count.</div>}
           {skillsSource === 'failed' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-failed">We couldn't suggest skills automatically just now. Pick the ones that apply below.</div>}
           <ChoiceGroup title="Practical and role skills" description="Select the skills that feel familiar in your work." options={skills} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix="skill"/>
           <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
