@@ -238,9 +238,17 @@ function ProfilePage() {
   const steps = ['Starting point', 'Your strengths', 'Where to next', 'Time to learn'];
   const update = (field: keyof ProfileData, value: string | number | string[]) => { setDraft((current) => ({ ...current, [field]: value })); setSaved(false); };
   const toggleList = (field: 'skills'|'competencies'|'targetSectors', value: string) => update(field, draft[field].includes(value) ? draft[field].filter((v) => v !== value) : [...draft[field], value]);
-   const skills = ['Vendor communication','Manual PO processing','Microsoft Excel','Inventory auditing','Procurement','Supplier coordination','Data entry','Inventory management','Process mapping','Documentation','Data analysis','Project coordination','Clinical documentation','Patient coordination','Shift scheduling','Teaching & facilitation','Customer support','Visual design','Content writing','Report writing','Quality assurance','Logistics coordination','Cash handling','Recruitment support'];
    const competencies = ['Communication','Adaptability','Coaching','Reliability','Empathy','Attention to detail','Organization','Decision making','Collaboration','Problem solving','Time management','Leadership'];
    const sectors = ['Smart logistics','Technology','Healthcare','Education','Public services','Logistics','Clean energy','Financial services','Community services'];
+   // Grouped by WHERE the work happens, not by "soft vs hard". A career switcher
+   // thinks "which part of my job is this?", not "is this a technical skill?".
+   // Competencies are already the people/thinking axis below.
+   const skillGroups = [
+     { key: 'ops', title: 'Business operations & procurement', description: 'Work with suppliers, stock, money or hiring.', options: ['Vendor communication','Supplier coordination','Procurement','Manual PO processing','Inventory management','Inventory auditing','Logistics coordination','Cash handling','Recruitment support','Quality assurance'] },
+     { key: 'care', title: 'Care, education & customer-facing', description: 'Work where the person in front of you is the job.', options: ['Clinical documentation','Patient coordination','Shift scheduling','Teaching & facilitation','Customer support'] },
+     { key: 'data', title: 'Data, documentation & process', description: 'Turning records into something other people can use.', options: ['Microsoft Excel','Data entry','Data analysis','Documentation','Report writing','Process mapping'] },
+     { key: 'creative', title: 'Creative & project work', description: 'Making things, and getting them finished with other people.', options: ['Visual design','Content writing','Project coordination'] },
+   ];
   const [inferring, setInferring] = useState(false);
   const [skillsSource, setSkillsSource] = useState<'ai' | 'empty' | 'failed' | null>(null);
   const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
@@ -330,7 +338,7 @@ function ProfilePage() {
           {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested"><span className="font-semibold">Suggested from your role. </span>{suggestedSummary ? <>{suggestedSummary} </> : null}Untick anything that does not describe your work.</div>}
           {skillsSource === 'empty' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-empty">We couldn't map that role onto our skill list. Pick the closest options below — your years of experience still count.</div>}
           {skillsSource === 'failed' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-failed">We couldn't suggest skills automatically just now. Pick the ones that apply below.</div>}
-          <ChoiceGroup title="Practical and role skills" description="Select the skills that feel familiar in your work." options={skills} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix="skill"/>
+          {skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}
           <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
           <div className="rounded-lg bg-secondary/40 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-strengths-explanation">Transferable skills are not limited to formal job titles. Include experience from volunteering, caregiving, community work, and life.</div>
         </div>}
