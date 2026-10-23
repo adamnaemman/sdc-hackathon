@@ -177,7 +177,7 @@ function Dashboard() {
   if (loadingRoles) return <><PageHeading eyebrow="Role explorer" title="Your next chapter, in view." description="Compare roles through the strengths you already carry and the skills you can build next."/><LoadingState label="roles"/></>;
   if (rolesError) return <><PageHeading eyebrow="Role explorer" title="Your next chapter, in view." description="Compare roles through the strengths you already carry and the skills you can build next."/><ErrorState label="roles" retry={refetchRoles}/></>;
   return <div className="page-enter">
-     <PageHeading eyebrow="Role explorer · 01" title={<>A next step that starts<br className="hidden sm:block"/> with what you know.</>} description="Explore adjacent roles through a synthetic procurement profile. Edit the example to see how transferable skills change each estimate." right={<div className="rounded-xl border border-border bg-card px-3 py-2 text-right"><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">Synthetic example · starting point</div><div className="mt-1 text-[12px] font-semibold" data-testid="text-current-role">{profile.currentRole || 'Add your role in profile'}</div></div>}/>
+     <PageHeading eyebrow="Role explorer · 01" title={<>A next step that starts<br className="hidden sm:block"/> with what you know.</>} description="Ranked for the profile you entered: your skills, your target sectors and your years of experience. Roles you do not match are shown further down, not hidden — you decide what is worth exploring." right={<div className="rounded-xl border border-border bg-card px-3 py-2 text-right"><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">Your profile · current role</div><div className="mt-1 text-[12px] font-semibold" data-testid="text-current-role">{profile.currentRole || 'Add your role in profile'}</div></div>}/>
     <LiveTrendStrip snapshot={trends} roles={roles} isLoading={trendsLoading} isError={trendsError} isRefreshing={trendsRefreshing} onRefresh={refreshTrends}/>
     <Card className="mb-7 overflow-hidden border-primary/10 bg-primary text-primary-foreground" testId="card-transition-context">
       <div className="surface-grid grid gap-7 p-5 sm:p-7 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
@@ -232,6 +232,7 @@ function RoleCard({ role, profile, rank, score, urgency, onSelect }: { role: Wor
 
 function ProfilePage() {
   const { profile, setProfile, roles, mode } = useApp();
+  const [, navigate] = useLocation();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState(profile);
   const [saved, setSaved] = useState(false);
@@ -396,7 +397,7 @@ function ProfilePage() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
           <div className="flex items-center gap-3">{saved && <span className="flex items-center gap-1 text-[10px] text-primary" data-testid="status-profile-updated"><CheckCircle2 size={13}/>Updated for this session</span>}
-            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); }} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground" data-testid="button-profile-finish"><Check size={14}/>Apply to role explorer</button>}</div>
+            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); navigate('/'); }} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground" data-testid="button-profile-finish"><Check size={14}/>Apply to role explorer</button>}</div>
         </div>
       </Card>
     </div>
