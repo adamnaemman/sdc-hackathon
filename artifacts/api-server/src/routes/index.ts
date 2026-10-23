@@ -5,6 +5,7 @@ import trendsRouter from "./trends";
 import extractRouter from "./extract";
 import planRouter from "./plan";
 import exploreRouter from "./explore";
+import libraryRouter from "./library";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(trendsRouter);
 router.use(extractRouter);
 router.use(planRouter);
 router.use(exploreRouter);
+router.use(libraryRouter);
 
 export default router;

@@ -16,6 +16,7 @@ import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
 import { LiveTrendStrip } from '@/components/live-trend-strip';
 import { AiPlanCard } from '@/components/ai-plan-card';
 import { ExploreRoles } from '@/components/explore-roles';
+import { LibraryExplorer } from '@/components/library-explorer';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
 
@@ -202,6 +203,7 @@ function Dashboard() {
     </div>
     {filtered.length === 0 ? <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center" data-testid="empty-roles"><div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-secondary"><Search size={18}/></div><div className="font-semibold">No role matches that search</div><p className="mt-1 text-xs text-muted-foreground">Try a different title or sector.</p><button onClick={() => setSearch('')} className="mt-4 text-xs font-semibold text-primary underline underline-offset-4" data-testid="button-clear-search">Clear search</button></div> :
        <div className="grid gap-4 xl:grid-cols-2" data-testid="list-role-comparisons">{filtered.map((role, index) => <RoleCard key={role.id} role={role} profile={profile} rank={index + 1} score={scores(role)} urgency={urgency(role)} onSelect={() => setSelectedRoleId(role.id)}/>)}</div>}
+    <LibraryExplorer skills={profile.skills}/>
     <div className="mt-5 flex items-start gap-3 rounded-xl border border-border/70 bg-secondary/45 p-4 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-fit-caveat"><CircleHelp size={15} className="mt-0.5 shrink-0 text-primary"/><p><strong className="text-foreground">How to read these scores:</strong> Fit and transition urgency are directional estimates based on the profile you entered and role data. They are not hiring probabilities, performance ratings, or predictions. Speak with a counselor to add local context.</p></div>
   </div>;
 }
