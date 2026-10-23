@@ -61,9 +61,10 @@ SOLUTION_LINES = [
     "future-ready roles with an explainable match score, a skill-gap breakdown, a sequenced reskilling "
     "pathway with hours and cost notes, and an explicit mapping of every role and module to an SDG target.",
     "AI is applied at three points, each chosen because a model or a live feed beats a static rule:",
-    "1. Skill normalisation. Form and free-text input are mapped onto a canonical skill vocabulary, so "
-    "'chasing POs in Excel' is recognised as procurement plus spreadsheet analysis instead of being "
-    "missed as unknown text.",
+    "1. Skill inference. The role, industry and years of experience the person enters are expanded by "
+    "the model into concrete, canonical skills - a Procurement Assistant becomes purchase orders, "
+    "supplier coordination and spreadsheet analysis - so the person does not have to guess which "
+    "checkboxes describe their own job.",
     "2. Live trend layer. Public job postings are fetched from an open API, counted against each role's "
     "required skills, and converted into a dated demand index. Every figure carries its source, the "
     "window it covers and the sample size, and the interface states when the data was last refreshed.",

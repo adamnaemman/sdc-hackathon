@@ -33,7 +33,7 @@ way to check where a claim came from.
 
 | | Feature | How it works |
 |---|---|---|
-| 1 | **Skills profile intake** | A guided four-step form, plus free-text extraction: paste "I chase suppliers and raise POs in Excel" and DeepSeek returns a structured profile constrained to the app's skill vocabulary. |
+| 1 | **Skills profile intake** | A guided four-step form. On "Save & continue" the role, industry and years of experience are sent to DeepSeek, which returns the concrete skills and competencies for that job — pre-selected and fully editable. If the model is unavailable, the user simply picks them by hand. |
 | 2 | **Live AI-trend signal layer** | 300 recent public job postings are fetched from the Arbeitnow API, tokenised, and counted against each role's required skills. Every number carries its source, fetch time, window and sample size. |
 | 3 | **Future-role matching** | A deterministic, inspectable score: skills overlap, transferable skills, sector match, experience, disruption exposure and live demand. The breakdown is visible, not hidden. |
 | 4 | **Personalised reskilling pathway** | Ordered steps with prerequisites respected, hours estimated, free/low-cost providers linked, and a reason for each step's position. |

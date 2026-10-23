@@ -40,8 +40,9 @@ ARCHITECTURE = (
     "future-ready roles and their learning steps, each step pointing at a free, verified provider page. "
     "Second, a live trend layer: it fetches recent public job postings, normalises the text, counts how "
     "often each role's required skills appear, and returns a demand share stamped with source, fetch time "
-    "and sample size; results are cached for six hours. Third, two AI endpoints on DeepSeek: one turns "
-    "free text into a structured profile, and one receives the whole profile plus the catalogue and "
+    "and sample size; results are cached for six hours. Third, two AI endpoints on DeepSeek: one expands "
+    "the person's role, industry and experience into concrete skills, and one receives the whole profile "
+    "plus the catalogue and "
     "returns a grounded recommendation with an ordered pathway. Every role ID and module ID returned by "
     "the model is validated against the catalogue before it reaches the browser. No personal data is "
     "stored anywhere; the profile lives in browser memory only."
@@ -111,11 +112,11 @@ SPONSOR_ESSENTIAL = (
 
 DATA_HANDLING = (
     "The application collects no account data and stores nothing on the server. A profile exists only in "
-    "browser memory and is discarded when the tab closes. Two optional actions leave the browser, and only "
-    "when the user presses a button: a free-text work description (sent to our API, forwarded to DeepSeek, "
-    "neither logged nor stored) and the structured profile summary sent with the AI plan request. That "
-    "request contains skills, years of experience and target sectors, never a name or contact detail. There "
-    "is no CV upload and no database. Server logs record method, URL, status and response time only."
+    "browser memory and is discarded when the tab closes. Two things leave the browser, both triggered by "
+    "a button: a one-line summary of role, industry and years of experience (sent to our API, forwarded to "
+    "DeepSeek, neither logged nor stored), and the structured profile sent with the AI plan request. "
+    "Neither contains a name or contact detail. There is no CV upload and no database. Server logs record "
+    "method, URL, status and response time only."
 )
 
 LIMITATIONS = (

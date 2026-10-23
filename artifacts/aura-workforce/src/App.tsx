@@ -15,7 +15,6 @@ import { useHealthCheck, useListMarketSignals, useListWorkforceRoles } from '@wo
 import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
 import { LiveTrendStrip } from '@/components/live-trend-strip';
 import { AiPlanCard } from '@/components/ai-plan-card';
-import { ExtractProfile } from '@/components/extract-profile';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
@@ -242,17 +241,51 @@ function ProfilePage() {
    const skills = ['Vendor communication','Manual PO processing','Microsoft Excel','Inventory auditing','Procurement','Supplier coordination','Data entry','Inventory management','Process mapping','Documentation','Data analysis','Project coordination'];
    const competencies = ['Communication','Adaptability','Coaching','Reliability','Empathy','Attention to detail','Organization','Decision making','Collaboration'];
    const sectors = ['Smart logistics','Technology','Healthcare','Education','Public services','Logistics','Clean energy','Financial services','Community services'];
-  const saveAndContinue = () => { setProfile(draft); setSaved(true); if (step < 3) setStep(step + 1); };
-  // Merge AI extraction into the draft without overwriting what the user already chose.
-  const applyExtraction = (result: { currentRole: string; yearsExperience: number; skills: string[]; competencies: string[] }) => {
-    setDraft((current) => ({
-      ...current,
-      currentRole: result.currentRole || current.currentRole,
-      yearsExperience: result.yearsExperience > 0 ? result.yearsExperience : current.yearsExperience,
-      skills: Array.from(new Set([...current.skills, ...result.skills])),
-      competencies: Array.from(new Set([...current.competencies, ...result.competencies])),
-    }));
-    setSaved(false);
+  const [inferring, setInferring] = useState(false);
+  const [skillsSource, setSkillsSource] = useState<'ai' | 'failed' | null>(null);
+
+  // Step 0 -> 1: the AI turns "role + industry + years" into concrete skills.
+  // If the model is unavailable we still advance — a broken model must never
+  // trap the user inside the form.
+  const saveAndContinue = async () => {
+    let next = draft;
+
+    if (step === 0) {
+      setInferring(true);
+      setSkillsSource(null);
+      try {
+        const text = `${draft.currentRole || 'A worker'} in ${draft.industry || 'an unspecified industry'}, ${draft.yearsExperience} years of experience.`;
+        const response = await fetch('/api/extract', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const suggestion = (await response.json()) as {
+          currentRole?: string;
+          skills?: string[];
+          competencies?: string[];
+        };
+
+        next = {
+          ...draft,
+          currentRole: draft.currentRole || suggestion.currentRole || '',
+          skills: suggestion.skills?.length ? Array.from(new Set(suggestion.skills)) : draft.skills,
+          competencies: suggestion.competencies?.length ? Array.from(new Set(suggestion.competencies)) : draft.competencies,
+        };
+        setSkillsSource('ai');
+      } catch {
+        setSkillsSource('failed');
+      } finally {
+        setInferring(false);
+      }
+    }
+
+    setDraft(next);
+    setProfile(next);
+    setSaved(true);
+    if (step < 3) setStep(step + 1);
   };
   return <div className="page-enter">
      <PageHeading eyebrow="Your profile · 02" title="Name what you already bring." description="A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends." right={<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="text-primary"/>Not saved to an account</div>}/>
@@ -267,7 +300,6 @@ function ProfilePage() {
       </aside>
       <Card className="p-5 sm:p-7" testId="card-profile-step">
         <div className="mb-6 flex items-center justify-between border-b border-border pb-4"><div><div className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">STEP 0{step+1} OF 04</div><h2 className="font-display mt-1 text-[22px] font-bold tracking-[-.04em]">{steps[step]}</h2></div><div className="font-mono-ui text-[10px] text-muted-foreground">{Math.round(((step+1)/4)*100)}% complete</div></div>
-        <ExtractProfile onApply={applyExtraction}/>
         {step === 0 && <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Current role" hint="What best describes your work today?"><input value={draft.currentRole} onChange={(e) => update('currentRole', e.target.value)} placeholder="e.g. Customer service team lead" className="form-input" data-testid="input-current-role"/></Field>
           <Field label="Industry" hint="Your current field or sector — pick one or type your own"><input value={draft.industry} onChange={(e) => update('industry', e.target.value)} list="industry-options" placeholder="e.g. Healthcare" className="form-input" data-testid="input-industry"/><datalist id="industry-options">
@@ -277,6 +309,8 @@ function ProfilePage() {
           <div className="rounded-xl bg-secondary/50 p-4"><div className="text-[11px] font-semibold">Start where you are</div><p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">A career transition can build on existing knowledge. You do not need to start over to explore something new.</p></div>
         </div>}
         {step === 1 && <div className="space-y-6">
+          {skillsSource === 'ai' && <div className="rounded-lg border border-primary/25 bg-primary/5 p-3 text-[10px] leading-relaxed" data-testid="note-skills-suggested">We suggested these skills from your role, industry and experience. Untick anything that does not describe your work.</div>}
+          {skillsSource === 'failed' && <div className="rounded-lg border border-border bg-secondary/50 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-skills-failed">We couldn't suggest skills automatically just now. Pick the ones that apply below.</div>}
           <ChoiceGroup title="Practical and role skills" description="Select the skills that feel familiar in your work." options={skills} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix="skill"/>
           <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
           <div className="rounded-lg bg-secondary/40 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-strengths-explanation">Transferable skills are not limited to formal job titles. Include experience from volunteering, caregiving, community work, and life.</div>
@@ -286,7 +320,7 @@ function ProfilePage() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
           <div className="flex items-center gap-3">{saved && <span className="flex items-center gap-1 text-[10px] text-primary" data-testid="status-profile-updated"><CheckCircle2 size={13}/>Updated for this session</span>}
-            {step < 3 ? <button onClick={saveAndContinue} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground" data-testid="button-profile-continue">Save & continue <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); }} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground" data-testid="button-profile-finish"><Check size={14}/>Apply to role explorer</button>}</div>
+            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); }} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground" data-testid="button-profile-finish"><Check size={14}/>Apply to role explorer</button>}</div>
         </div>
       </Card>
     </div>
