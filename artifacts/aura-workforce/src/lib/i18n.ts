@@ -57,7 +57,7 @@ type Copy = {
 
 export const copy: Record<Lang, Copy> = {
   en: {
-    nav: { signals: '01 · Market signals', profile: '02 · Your profile', roles: '03 · Future roles', pathway: '04 · Learning path' },
+    nav: { signals: 'Market signals', profile: 'Your profile', roles: 'Future roles', pathway: 'Learning path' },
     navDetail: { signals: 'Evidence & sources', profile: 'Strengths & goals', roles: 'Chosen by the AI', pathway: 'Your study plan' },
     hero: {
       titleA: 'Your next chapter,', titleB: 'mapped.',
@@ -121,7 +121,7 @@ export const copy: Record<Lang, Copy> = {
     },
   },
   bm: {
-    nav: { signals: '01 · Isyarat pasaran', profile: '02 · Profil anda', roles: '03 · Peranan masa depan', pathway: '04 · Laluan belajar' },
+    nav: { signals: 'Isyarat pasaran', profile: 'Profil anda', roles: 'Peranan masa depan', pathway: 'Laluan belajar' },
     navDetail: { signals: 'Bukti & sumber', profile: 'Kekuatan & matlamat', roles: 'Dipilih oleh AI', pathway: 'Pelan belajar anda' },
     hero: {
       titleA: 'Bab seterusnya anda,', titleB: 'dipetakan.',
