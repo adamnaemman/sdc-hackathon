@@ -18,6 +18,7 @@ import { AiPlanCard } from '@/components/ai-plan-card';
 import { FutureRolesSection } from '@/components/future-roles-section';
 import { LearningPathSection } from '@/components/learning-path-section';
 import { HeroSection } from '@/components/hero-section';
+import { SettingsProvider, SettingsControls, useSettings } from '@/lib/settings';
 import { ExploreRoles } from '@/components/explore-roles';
 import { fetchTrends, type TrendSnapshot } from '@/lib/live-trends';
 import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scoreRole, urgencyFor } from '@/lib/scoring';
@@ -102,14 +103,14 @@ const initialProfile: ProfileData = {
   weeklyHours: 6,
 };
 const navItems = [
-  { href: '#signals', label: '01 · Market signals', icon: Activity, detail: 'Evidence & sources' },
-  { href: '#profile', label: '02 · Your profile', icon: Users, detail: 'Strengths & goals' },
-  { href: '#roles', label: '03 · Future roles', icon: Compass, detail: 'Chosen by the AI' },
-  { href: '#pathway', label: '04 · Learning path', icon: BookOpen, detail: 'Your study plan' },
+  { href: '#signals', key: 'signals' as const, icon: Activity },
+  { href: '#profile', key: 'profile' as const, icon: Users },
+  { href: '#roles', key: 'roles' as const, icon: Compass },
+  { href: '#pathway', key: 'pathway' as const, icon: BookOpen },
 ];
 
 function App() {
-  return <QueryClientProvider client={queryClient}><AppContent /></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><SettingsProvider><AppContent/></SettingsProvider></QueryClientProvider>;
 }
 
 function AppContent() {
@@ -254,6 +255,7 @@ function outlookMetric(role: WorkforceRole) {
 
 function WorkspaceShell() {
   const { plan, planLoading, explored, exploredLoading, exploredPathway, pathwayLoading, pathwayError, pathwayRoleTitle, buildPathwayFor, profile } = useApp();
+  const { t } = useSettings();
   const [location] = useLocation();
   const [mobileNav, setMobileNav] = useState(false);
   const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
@@ -266,9 +268,9 @@ function WorkspaceShell() {
       </div>
       <div className="px-5 pb-3 font-mono-ui text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/45">Your workspace</div>
       <nav className="flex flex-col gap-1 px-3" aria-label="Main navigation">
-        {navItems.map(({ href, label, icon: Icon, detail }) => <a key={href} href={href} onClick={() => setMobileNav(false)} className="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid={`link-${href.slice(1)}`}>
+        {navItems.map(({ href, key, icon: Icon }) => <a key={href} href={href} onClick={() => setMobileNav(false)} className="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid={`link-${href.slice(1)}`}>
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-foreground/5"><Icon size={17}/></span>
-          <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold">{label}</span><span className="mt-0.5 block text-[10px] text-sidebar-foreground/45">{detail}</span></span>
+          <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold">{t.nav[key]}</span><span className="mt-0.5 block text-[10px] text-sidebar-foreground/45">{t.navDetail[key]}</span></span>
         </a>)}
       </nav>
       <div className="mt-auto px-4 pb-5">
@@ -286,7 +288,7 @@ function WorkspaceShell() {
           <button className="rounded-lg border border-border p-2 lg:hidden" onClick={() => setMobileNav(true)} aria-label="Open navigation" data-testid="button-open-navigation"><Menu size={18}/></button>
           <div className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-muted-foreground">AURA <span className="px-1 text-accent">/</span> {title}</div>
         </div>
-        <div className="flex items-center gap-3"><span className="hidden text-[11px] text-muted-foreground sm:inline">A guide, not a verdict</span><div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-bold" data-testid="text-session-profile">P</div></div>
+        <div className="flex items-center gap-3"><SettingsControls/><span className="hidden text-[11px] text-muted-foreground sm:inline">A guide, not a verdict</span><div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-bold" data-testid="text-session-profile">P</div></div>
       </header>
       <main className="mx-auto w-full max-w-[1500px] px-4 sm:px-7 lg:px-10">
         <ErrorBoundary>
@@ -298,7 +300,7 @@ function WorkspaceShell() {
           <LearningPathSection verified={exploredPathway} pathwayLoading={pathwayLoading} pathwayError={pathwayError} weeklyHours={profile.weeklyHours}/>
         </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">
-          <span>Directional estimates only. Your experience and judgment lead the way.</span><span className="font-mono-ui tracking-[.08em]">AURA · PRIVACY-FIRST PLANNING</span>
+          <span>{t.footer.left}</span><span className="font-mono-ui tracking-[.08em]">{t.footer.right}</span>
         </footer>
       </main>
     </div>
@@ -408,6 +410,7 @@ function RoleCard({ role, profile, rank, score, urgency, onSelect, aiReason }: {
 
 function ProfilePage() {
   const { profile, setProfile, roles, mode, generatePlan, planLoading, generateExplore, exploredLoading } = useApp();
+  const { t } = useSettings();
   const [, navigate] = useLocation();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState(profile);
@@ -528,7 +531,7 @@ function ProfilePage() {
     if (step < 3) setStep(step + 1);
   };
   return <div className="page-enter">
-     <PageHeading eyebrow="Checkpoint 02 · Your profile" title="Name what you already bring." description="A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends." right={<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="text-primary"/>Not saved to an account</div>}/>
+     <PageHeading eyebrow={t.cp.twoEyebrow} title={t.cp.twoTitle} description="A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends." right={<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="text-primary"/>Not saved to an account</div>}/>
     <div className="grid gap-7 lg:grid-cols-[250px_1fr]">
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <div className="rounded-2xl bg-primary p-5 text-primary-foreground">
@@ -618,13 +621,14 @@ function EmptyState({ title, description, icon }: { title: string; description: 
 
 function SignalsPage() {
   const { signals, loadingSignals, signalsError, refetchSignals, roles, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends } = useApp();
+  const { t } = useSettings();
   const [category, setCategory] = useState('All signals');
   const [query, setQuery] = useState('');
   const categories = ['All signals', ...Array.from(new Set(signals.map((signal) => signal.category).filter(Boolean)))];
   const visible = signals.filter((signal) => (category === 'All signals' || signal.category === category) && `${signal.title} ${signal.summary} ${signal.sourceName} ${signal.geography}`.toLowerCase().includes(query.toLowerCase()));
   const publishedDate = (date: string) => { const parsed = new Date(date); return Number.isNaN(parsed.valueOf()) ? date : new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(parsed); };
   return <div className="page-enter">
-    <PageHeading eyebrow="Checkpoint 01 · Market signals" title="Evidence, with its sources attached." description="A small set of labor-market signals to add context to your exploration. Read the geography, date, and source note before drawing conclusions." right={<div className="flex items-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-3 py-2 text-[9px] font-semibold text-foreground"><span className="h-1.5 w-1.5 rounded-full bg-accent"/>Sourced snapshots · not a live feed</div>}/>
+    <PageHeading eyebrow={t.cp.oneEyebrow} title={t.cp.oneTitle} description={t.cp.oneSub} right={<div className="flex items-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-3 py-2 text-[9px] font-semibold text-foreground"><span className="h-1.5 w-1.5 rounded-full bg-accent"/>Sourced snapshots · not a live feed</div>}/>
      <LiveTrendStrip snapshot={trends} roles={roles} isLoading={trendsLoading} isError={trendsError} isRefreshing={trendsRefreshing} onRefresh={refreshTrends}/>
      <Card className="mb-3 border-primary/10 bg-secondary/40" testId="card-signal-caveat"><div className="flex gap-3 p-4 sm:p-5"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary"><FileText size={17}/></div><div><div className="text-[11px] font-semibold">Context, not certainty</div><p className="mt-1 max-w-4xl text-[10px] leading-relaxed text-muted-foreground">These figures are sourced snapshots, not real-time updates or forecasts. Labor data can lag, vary by geography, and describe broad groups rather than individual outcomes. Open each source to review the original methodology.</p></div></div></Card>
      <p className="mb-5 font-mono-ui text-[9px] text-muted-foreground" data-testid="text-signal-review-date">Source links reviewed 21 Oct 2026 · each card shows its source period or publication date</p>

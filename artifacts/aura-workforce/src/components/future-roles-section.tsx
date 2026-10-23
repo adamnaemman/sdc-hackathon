@@ -11,6 +11,7 @@
  */
 
 import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { useSettings } from '@/lib/settings';
 
 type ExploredRole = {
   title: string;
@@ -38,20 +39,20 @@ type FutureRolesSectionProps = {
 };
 
 export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, pathwayLoading, pathwayRoleTitle }: FutureRolesSectionProps) {
+  const { t } = useSettings();
   const roles = explored?.roles ?? [];
 
   return (
     <section id="roles" className="scroll-mt-24 border-t border-border py-10">
       <div className="mb-6">
         <div className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.19em] text-muted-foreground">
-          <span className="h-px w-5 bg-accent" />Checkpoint 03 · Future roles
+          <span className="h-px w-5 bg-accent" />{t.cp.threeEyebrow}
         </div>
         <h2 className="font-display max-w-3xl text-[32px] font-bold leading-[1.1] tracking-[-.055em] sm:text-[40px]">
-          The roles the AI chose for you.
+          {t.cp.threeTitle}
         </h2>
         <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
-          Generated from your profile, not picked from a list. Each occupation comes with the model&apos;s
-          reasoning, the skills it thinks you would need, and a reference you can check yourself.
+          {t.cp.threeSub}
         </p>
       </div>
 

@@ -13,6 +13,7 @@
  */
 
 import { ArrowUpRight, AlertTriangle, CalendarDays, Clock3, ExternalLink } from 'lucide-react';
+import { useSettings } from '@/lib/settings';
 
 type PathwayStep = {
   moduleId: string;
@@ -65,6 +66,7 @@ export function LearningPathSection({
   pathwayError,
   weeklyHours,
 }: LearningPathSectionProps) {
+  const { t } = useSettings();
   const steps: PathwayStep[] = (verified?.steps ?? []).map((step) => ({
     moduleId: step.moduleId,
     title: step.title,
@@ -85,14 +87,13 @@ export function LearningPathSection({
     <section id="pathway" className="scroll-mt-24 border-t border-border py-10">
       <div className="mb-6">
         <div className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.19em] text-muted-foreground">
-          <span className="h-px w-5 bg-accent" />Checkpoint 04 · Learning path
+          <span className="h-px w-5 bg-accent" />{t.cp.fourEyebrow}
         </div>
         <h2 className="font-display max-w-3xl text-[32px] font-bold leading-[1.1] tracking-[-.055em] sm:text-[40px]">
-          A plan built around the hours you actually have.
+          {t.cp.fourTitle}
         </h2>
         <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
-          Every step below links to a course page we checked before shipping. The model chose the order and
-          wrote the reason — it cannot invent a course.
+          {t.cp.fourSub}
         </p>
       </div>
 

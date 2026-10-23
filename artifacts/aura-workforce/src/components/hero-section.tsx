@@ -8,8 +8,10 @@
  */
 
 import { ArrowRight, ChevronDown, Compass } from 'lucide-react';
+import { useSettings } from '@/lib/settings';
 
 export function HeroSection() {
+  const { t } = useSettings();
   return (
     <section className="relative isolate flex min-h-[calc(100svh-4.5rem)] flex-col justify-center overflow-hidden py-14 sm:py-20" data-testid="hero">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
@@ -55,14 +57,13 @@ export function HeroSection() {
         </div>
 
         <h1 className="font-display mt-8 text-[46px] font-bold leading-[.95] tracking-[-.065em] sm:text-[84px]">
-          Your next chapter,
+          {t.hero.titleA}
           <br />
-          <span className="text-primary">mapped.</span>
+          <span className="text-primary">{t.hero.titleB}</span>
         </h1>
 
         <p className="mt-6 max-w-md text-[13px] leading-relaxed text-muted-foreground sm:text-[14px]">
-          Four checkpoints: the evidence, your profile, the roles the AI concludes fit you, and a study plan
-          built around the hours you actually have.
+          {t.hero.sub}
         </p>
 
         <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -71,31 +72,31 @@ export function HeroSection() {
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-[11px] font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
             data-testid="hero-start"
           >
-            Start with checkpoint 01 <ArrowRight size={14} />
+            {t.hero.cta1} <ArrowRight size={14} />
           </a>
           <a
             href="#profile"
             className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-3 text-[11px] font-semibold transition-colors hover:border-primary/40"
           >
-            Set up your profile
+            {t.hero.cta2}
           </a>
         </div>
 
         <div className="mt-12 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">
-          <span>4 checkpoints</span>
+          <span>{t.hero.chip1}</span>
           <span className="text-accent">·</span>
-          <span>Sourced &amp; dated</span>
+          <span>{t.hero.chip2}</span>
           <span className="text-accent">·</span>
-          <span>Private by design</span>
+          <span>{t.hero.chip3}</span>
         </div>
 
         <a
           href="#signals"
           className="mt-14 inline-flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.22em] text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Scroll to checkpoint 01"
+          aria-label={t.hero.scroll}
         >
           <ChevronDown size={14} className="animate-bounce" />
-          Scroll to checkpoint 01
+          {t.hero.scroll}
         </a>
       </div>
     </section>
