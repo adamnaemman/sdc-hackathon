@@ -240,7 +240,7 @@ function WorkspaceShell() {
 
           <section id="signals" className="scroll-mt-24 border-t border-border pt-8"><SignalsPage/></section>
           <section id="profile" className="scroll-mt-24 border-t border-border pt-8"><ProfilePage/></section>
-          <FutureRolesSection plan={plan} explored={explored} planLoading={planLoading} exploredLoading={exploredLoading}/>
+          <FutureRolesSection explored={explored} exploredLoading={exploredLoading}/>
           <LearningPathSection plan={plan} planLoading={planLoading} weeklyHours={profile.weeklyHours}/>
         </ErrorBoundary>
         <footer className="mt-14 flex flex-col gap-2 border-t border-border/70 py-5 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between" data-testid="footer-caveat">
