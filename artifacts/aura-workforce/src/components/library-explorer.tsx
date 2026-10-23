@@ -9,7 +9,7 @@
  * of your skills its description mentions.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertTriangle, Library } from 'lucide-react';
 
 type LibraryRole = {
@@ -38,11 +38,13 @@ export function LibraryExplorer({ skills }: LibraryExplorerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const skillKey = skills.join(',');
+
   async function search() {
     setIsLoading(true);
     setError(null);
     try {
-      const query = encodeURIComponent(skills.join(','));
+      const query = encodeURIComponent(skillKey);
       const response = await fetch(`/api/library?skills=${query}`);
       if (!response.ok) throw new Error(`The library returned HTTP ${response.status}.`);
       setResult((await response.json()) as LibraryResult);
@@ -53,21 +55,29 @@ export function LibraryExplorer({ skills }: LibraryExplorerProps) {
     }
   }
 
+  // Load automatically: this is the main list now, not a side panel, so the
+  // user should not have to press a button to see their options.
+  useEffect(() => {
+    if (skillKey.trim() === '') return;
+    void search();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skillKey]);
+
   return (
     <section className="mt-7 rounded-2xl border border-border bg-card p-5 sm:p-6" data-testid="card-library">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <div className="flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.18em] text-muted-foreground">
             <Library size={12} className="text-primary" />
-            Wider labour market
+            Matched from 916 occupations
           </div>
           <h2 className="font-display mt-2 text-[20px] font-bold tracking-[-.04em]">
-            Five roles is not the whole world.
+            Where your skills actually appear.
           </h2>
           <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-            Search {result ? result.total : 916} real occupations from the O*NET database and see which
-            ones mention the skills you selected. These have no curated pathway yet — they are directions
-            to research, not a plan.
+            Real occupations from the O*NET database whose descriptions mention the skills you selected —
+            including ones outside our five curated roles. They have no pathway yet, so treat them as
+            directions to research.
           </p>
         </div>
 
@@ -79,7 +89,7 @@ export function LibraryExplorer({ skills }: LibraryExplorerProps) {
           data-testid="button-search-library"
         >
           <Library size={13} />
-          {isLoading ? 'Searching…' : result ? 'Search again' : 'Search occupations'}
+          {isLoading ? 'Searching…' : result ? 'Refresh matches' : 'Find matches'}
         </button>
       </div>
 
