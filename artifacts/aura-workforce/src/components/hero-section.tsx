@@ -9,6 +9,7 @@
 
 import { ArrowRight, ChevronDown, Compass } from 'lucide-react';
 import { useSettings } from '@/lib/settings';
+import { AuraAvatar } from '@/components/aura-avatar';
 
 export function HeroSection() {
   const { t } = useSettings();
@@ -62,9 +63,7 @@ export function HeroSection() {
           <span className="text-primary">{t.hero.titleB}</span>
         </h1>
 
-        <p className="mt-6 max-w-md text-[13px] leading-relaxed text-muted-foreground sm:text-[14px]">
-          {t.hero.sub}
-        </p>
+        <AuraAvatar/>
 
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <a
