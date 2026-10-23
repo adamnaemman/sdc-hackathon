@@ -12,7 +12,8 @@
  * have each week, so the plan is a schedule, not a wish.
  */
 
-import { ArrowUpRight, AlertTriangle, CalendarDays, Clock3, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, AlertTriangle, CalendarDays, Clock3, ExternalLink, FileDown, QrCode } from 'lucide-react';
 import { useSettings } from '@/lib/settings';
 
 type PathwayStep = {
@@ -67,6 +68,8 @@ export function LearningPathSection({
   weeklyHours,
 }: LearningPathSectionProps) {
   const { t } = useSettings();
+  const [openQr, setOpenQr] = useState<string | null>(null);
+  const qrFor = (url: string) => `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data=${encodeURIComponent(url)}`;
   const steps: PathwayStep[] = (verified?.steps ?? []).map((step) => ({
     moduleId: step.moduleId,
     title: step.title,
@@ -96,6 +99,20 @@ export function LearningPathSection({
           {t.cp.fourSub}
         </p>
       </div>
+
+      {steps.length > 0 ? (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2.5 text-[10px] font-semibold text-primary-foreground"
+            data-testid="button-export-pdf"
+          >
+            <FileDown size={13} /> {t.plan.exportPdf}
+          </button>
+          <span className="text-[9px] leading-relaxed text-muted-foreground">{t.plan.exportHint}</span>
+        </div>
+      ) : null}
 
       {busy ? (
         <div className="rounded-2xl border border-border bg-card p-6" role="status">
@@ -249,6 +266,24 @@ export function LearningPathSection({
                         {step.provider ?? 'Course'} <ExternalLink size={10} />
                       </a>
                     ) : null}
+                    {step.url ? (
+                      <div className="mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setOpenQr(openQr === step.moduleId ? null : step.moduleId)}
+                          className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[9px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                          data-testid={`button-qr-${step.moduleId}`}
+                        >
+                          <QrCode size={11} /> {t.plan.showQr}
+                        </button>
+                        {openQr === step.moduleId ? (
+                          <div className="mt-2 inline-flex flex-col items-start gap-1 rounded-lg border border-border bg-card p-2" data-testid={`qr-panel-${step.moduleId}`}>
+                            <img src={qrFor(step.url)} alt={`QR code for ${step.title}`} width={110} height={110} loading="lazy" />
+                            <span className="max-w-[180px] break-all text-[8px] leading-snug text-muted-foreground">{step.url}</span>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 </li>
               );
@@ -288,6 +323,32 @@ export function LearningPathSection({
           </aside>
         </div>
       ) : null}
+
+      {/* Printable version: hidden on screen, the only thing the printer sees. */}
+      <div id="print-plan" className="pointer-events-none absolute left-[-9999px] top-0 w-[820px]" aria-hidden>
+        <div className="font-mono-ui text-[9px] uppercase tracking-[.24em]">AURA · {t.plan.printTitle}</div>
+        <h1 className="mt-1 text-[26px] font-bold">{roleTitle}</h1>
+        <p className="mt-1 text-[11px]">
+          {t.plan.printSub} · {totalHours} {t.plan.hours} · {totalWeeks} {t.plan.weeks} · {hoursPerWeek} h / {t.plan.weekLabel}
+        </p>
+        <ol className="mt-5 space-y-3">
+          {steps.map((step, index) => (
+            <li key={`print-${step.moduleId}`} className="qr-row flex items-start gap-3 border-b border-[#ddd] pb-3">
+              <span className="w-6 shrink-0 text-[11px]">{String(index + 1).padStart(2, '0')}</span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[12px] font-semibold">{step.title}</div>
+                <div className="mt-0.5 text-[10px]">
+                  {step.hours} h · {step.provider ?? ''} · {t.plan.weekLabel} {Math.floor(steps.slice(0, index).reduce((sum, item) => sum + Number(item.hours || 0), 0) / hoursPerWeek) + 1}
+                </div>
+                <div className="mt-1 text-[10px]">{step.why}</div>
+                {step.url ? <div className="mt-1 break-all text-[8px]">{step.url}</div> : null}
+              </div>
+              {step.url ? <img src={qrFor(step.url)} alt="" width={84} height={84} /> : null}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 text-[9px]">{t.plan.printNote}</p>
+      </div>
     </section>
   );
 }
