@@ -258,6 +258,24 @@ function ProfilePage() {
   const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [suggested, setSuggested] = useState<{ tools: string[]; practical: string[]; competencies: string[] } | null>(null);
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [addingSkill, setAddingSkill] = useState(false);
+  const [customSkill, setCustomSkill] = useState('');
+  const vocabulary = new Set(skillGroups.flatMap((group) => group.options));
+  const customSkills = draft.skills.filter((skill) => !vocabulary.has(skill));
+  const addCustomSkill = () => {
+    const value = customSkill.trim();
+    if (!value) { setAddingSkill(false); return; }
+    if (!draft.skills.includes(value)) {
+      setDraft((current) => ({ ...current, skills: [...current.skills, value] }));
+    }
+    setCustomSkill('');
+    setAddingSkill(false);
+    setSaved(false);
+  };
+  const removeCustomSkill = (skill: string) => {
+    setDraft((current) => ({ ...current, skills: current.skills.filter((item) => item !== skill) }));
+    setSaved(false);
+  };
 
   // Step 0 -> 1: the AI turns "role + industry + years" into concrete skills.
   // If the model is unavailable we still advance — a broken model must never
@@ -289,11 +307,17 @@ function ProfilePage() {
 
         if (suggestedSkills.length > 0 || suggestedCompetencies.length > 0) {
           // Replace rather than merge: the previous selection belonged to the
-          // example profile, not to the role the user just described.
+          // example profile, not to the role the user just described. Custom
+          // skills the user typed themselves are kept — losing them silently
+          // when the suggestion re-runs would be worse than a stale chip.
+          const keepCustom = draft.skills.filter((skill) => !vocabulary.has(skill));
           next = {
             ...draft,
             currentRole: draft.currentRole || suggestion.currentRole || '',
-            skills: suggestedSkills.length > 0 ? Array.from(new Set(suggestedSkills)) : draft.skills,
+            skills:
+              suggestedSkills.length > 0
+                ? Array.from(new Set([...suggestedSkills, ...keepCustom]))
+                : draft.skills,
             competencies:
               suggestedCompetencies.length > 0
                 ? Array.from(new Set(suggestedCompetencies))
@@ -359,6 +383,14 @@ function ProfilePage() {
             {skillGroups.map((group) => <ChoiceGroup key={group.key} title={group.title} description={group.description} options={group.options} chosen={draft.skills} toggle={(v) => toggleList('skills',v)} prefix={`skill-${group.key}`}/>)}
             <ChoiceGroup title="People and work competencies" description="Strengths you use across many situations." options={competencies} chosen={draft.competencies} toggle={(v) => toggleList('competencies',v)} prefix="competency"/>
           </>}
+          <div className="flex flex-wrap items-center gap-2" data-testid="row-add-skill">
+            {customSkills.map((skill) => <button key={skill} type="button" onClick={() => removeCustomSkill(skill)} className="focus-ring inline-flex items-center gap-1 rounded-lg border border-dashed border-primary/50 bg-primary/5 px-2.5 py-1.5 text-[10px] text-primary" data-testid={`tag-custom-skill-${normalize(skill)}`}>{skill} <X size={10}/></button>)}
+            {addingSkill ? <>
+              <input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addCustomSkill(); } if (event.key === 'Escape') { setAddingSkill(false); setCustomSkill(''); } }} autoFocus placeholder="e.g. Blender, bookkeeping" className="form-input w-[220px]" aria-label="Name the skill you want to add" data-testid="input-add-skill"/>
+              <button type="button" onClick={addCustomSkill} className="focus-ring rounded-lg bg-primary px-3 py-2 text-[10px] font-semibold text-primary-foreground" data-testid="button-confirm-add-skill">Add</button>
+              <button type="button" onClick={() => { setAddingSkill(false); setCustomSkill(''); }} className="text-[10px] text-muted-foreground underline underline-offset-2">Cancel</button>
+            </> : <button type="button" onClick={() => setAddingSkill(true)} className="focus-ring rounded-lg border border-dashed border-border px-3 py-2 text-[10px] font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground" data-testid="button-add-skill">+ Add a skill</button>}
+          </div>
           <p className="text-[9px] leading-relaxed text-muted-foreground" data-testid="note-skill-glossary">Definitions: <a href="/skill-glossary.pdf" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">skill glossary (45 entries, PDF)</a> · Full reference: <a href="/skill-taxonomy-onet.pdf" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">1,000 O*NET technologies, A–Z (PDF)</a> · Taxonomies: <a href="https://www.onetonline.org/find/descriptor/browse/2.B/" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">O*NET</a> · <a href="https://esco.ec.europa.eu/en/classification/skill_main" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">ESCO</a></p>
           <div className="rounded-lg bg-secondary/40 p-3 text-[10px] leading-relaxed text-muted-foreground" data-testid="note-strengths-explanation">Transferable skills are not limited to formal job titles. Include experience from volunteering, caregiving, community work, and life.</div>
         </div>}
