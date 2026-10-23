@@ -40,13 +40,29 @@ export type PathwayStep = {
   why: string;
 };
 
+export type PathwayTopic = {
+  topic: string;
+  why: string;
+  provider: string;
+  hours: number;
+  searchUrl: string;
+};
+
 export type BuiltPathway = {
   roleTitle: string;
   steps: PathwayStep[];
+  topics: PathwayTopic[];
   totalHours: number;
   note: string;
   model: string;
   generatedAt: string;
+};
+
+/** Search pages we can construct ourselves, so a link is never invented. */
+const SEARCH_URLS: Record<string, string> = {
+  Coursera: "https://www.coursera.org/search?query=",
+  "Microsoft Learn": "https://learn.microsoft.com/en-us/search/?terms=",
+  YouTube: "https://www.youtube.com/results?search_query=",
 };
 
 const API_URL = "https://api.deepseek.com/chat/completions";
@@ -72,13 +88,15 @@ function systemPrompt(): string {
 
 Rules, all mandatory:
 - Choose between 3 and 5 modules, ONLY from the provided library. Never invent a module, course, provider or URL.
+- If the library cannot cover this occupation at all, set "steps" to [] and instead return 3 to 5 "topics": the study areas this person must learn. For each topic pick a provider from exactly these three: "Coursera", "Microsoft Learn", "YouTube". Do NOT write a course name or a URL for topics — only the topic, why it matters, and the provider.
+- Never return both a full set of steps and a full set of topics for the same occupation.
 - Order them so that foundations come before anything that depends on them.
 - "why" is one sentence, maximum 25 words, and must refer to something in the person's profile or to the occupation itself.
 - If the library contains nothing relevant to this occupation, return an empty list and explain that in "note". Returning fewer modules is correct; padding with irrelevant courses is a failure.
 - Output JSON only, no markdown.
 
 Return exactly:
-{"steps":[{"moduleId":"","order":1,"why":""}],"note":""}`;
+{"steps":[{"moduleId":"","order":1,"why":""}],"topics":[{"topic":"","why":"","provider":""}],"note":""}`;
 }
 
 const ModelOutputSchema = z.object({
@@ -88,6 +106,15 @@ const ModelOutputSchema = z.object({
         moduleId: z.coerce.string().catch(""),
         order: z.coerce.number().catch(0),
         why: z.coerce.string().catch(""),
+      }),
+    )
+    .catch([]),
+  topics: z
+    .array(
+      z.object({
+        topic: z.coerce.string().catch(""),
+        why: z.coerce.string().catch(""),
+        provider: z.coerce.string().catch("Coursera"),
       }),
     )
     .catch([]),
@@ -186,10 +213,28 @@ Return the JSON now.`;
     .slice(0, 5)
     .map((step, index) => ({ ...step, order: index + 1 }));
 
+  // If the library could not cover the occupation, the model returns study
+  // topics instead. We build the link ourselves from a fixed set of search pages,
+  // so nothing is invented: it is a search for the topic, not a pretend course.
+  const topics: PathwayTopic[] = parsed.topics
+    .filter((topic) => topic.topic.trim().length > 2)
+    .slice(0, 5)
+    .map((topic) => {
+      const provider = SEARCH_URLS[topic.provider] ? topic.provider : "Coursera";
+      return {
+        topic: topic.topic.trim().slice(0, 90),
+        why: topic.why.trim().slice(0, 220),
+        provider,
+        hours: 6,
+        searchUrl: `${SEARCH_URLS[provider]}${encodeURIComponent(topic.topic.trim())}`,
+      };
+    });
+
   return {
     roleTitle: roleTitle.slice(0, 120),
     steps,
-    totalHours: steps.reduce((sum, step) => sum + step.hours, 0),
+    topics: steps.length > 0 ? [] : topics,
+    totalHours: steps.length > 0 ? steps.reduce((sum, step) => sum + step.hours, 0) : topics.length * 6,
     note: parsed.note.trim().slice(0, 300),
     model: MODEL,
     generatedAt: new Date().toISOString(),

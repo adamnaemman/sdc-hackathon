@@ -45,6 +45,7 @@ type VerifiedPathway = {
     order: number;
     why: string;
   }>;
+  topics?: Array<{ topic: string; why: string; provider: string; hours: number; searchUrl: string }>;
   totalHours: number;
   note: string;
   model: string;
@@ -114,7 +115,72 @@ export function LearningPathSection({
         </div>
       ) : null}
 
-      {!busy && verified && verified.steps.length === 0 && !pathwayError ? (
+      {!busy && verified && verified.steps.length === 0 && (verified.topics?.length ?? 0) > 0 ? (
+        <div data-testid="topic-plan">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] text-muted-foreground">
+              No verified course exists for <span className="font-semibold text-foreground">{verified.roleTitle}</span> yet,
+              so the planner wrote the study topics instead. Each link opens a search for that topic.
+            </p>
+            <span className="rounded-full border border-accent/50 bg-accent/10 px-2.5 py-1 text-[9px] font-semibold">
+              Topics · search links, not courses
+            </span>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
+            <ol className="space-y-3">
+              {(verified.topics ?? []).map((topic, index) => (
+                <li key={topic.topic} className="flex items-start gap-3" data-testid={`topic-${index + 1}`}>
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background font-mono-ui text-[10px] font-medium">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div className="min-w-0 flex-1 rounded-2xl border border-border bg-card p-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 className="font-display text-[15px] font-bold tracking-[-.02em]">{topic.topic}</h3>
+                      <span className="font-mono-ui text-[9px] text-muted-foreground">{topic.hours} h · week {index + 1}</span>
+                    </div>
+                    <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">{topic.why}</p>
+                    <a
+                      href={topic.searchUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 text-[9px] font-semibold text-primary underline underline-offset-2"
+                    >
+                      Search this topic on {topic.provider} <ExternalLink size={10} />
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <aside className="h-fit rounded-2xl bg-primary p-5 text-primary-foreground lg:sticky lg:top-24">
+              <div className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-primary-foreground/55">TOPIC PLAN FOR</div>
+              <div className="font-display mt-1 text-[18px] font-bold tracking-[-.03em]">{verified.roleTitle}</div>
+              <div className="mt-4 space-y-3 border-t border-primary-foreground/15 pt-4">
+                <div className="flex items-center gap-2">
+                  <Clock3 size={14} className="text-primary-foreground/70" />
+                  <div>
+                    <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">Estimated time</div>
+                    <div className="text-[14px] font-bold">{verified.totalHours} hours</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CalendarDays size={14} className="text-primary-foreground/70" />
+                  <div>
+                    <div className="font-mono-ui text-[8px] uppercase tracking-wider text-primary-foreground/50">At {hoursPerWeek} h / week</div>
+                    <div className="text-[14px] font-bold">{Math.max(1, Math.ceil(verified.totalHours / hoursPerWeek))} weeks approx.</div>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 text-[9px] leading-relaxed text-primary-foreground/55">
+                Hours are our estimate of the study time, not a provider figure. Pick one course per topic yourself.
+              </p>
+            </aside>
+          </div>
+        </div>
+      ) : null}
+
+      {!busy && verified && verified.steps.length === 0 && (verified.topics?.length ?? 0) === 0 && !pathwayError ? (
         <div className="rounded-2xl border border-accent/40 bg-accent/10 p-6" data-testid="pathway-none">
           <div className="flex items-start gap-3">
             <AlertTriangle size={16} className="mt-0.5 shrink-0" />

@@ -69,6 +69,7 @@ type VerifiedStep = {
 type VerifiedPathway = {
   roleTitle: string;
   steps: VerifiedStep[];
+  topics?: Array<{ topic: string; why: string; provider: string; hours: number; searchUrl: string }>;
   totalHours: number;
   note: string;
   model: string;
