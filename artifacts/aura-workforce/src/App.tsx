@@ -35,6 +35,23 @@ type AiPlan = {
   model: string;
   generatedAt: string;
 };
+
+type ExploredRole = {
+  title: string;
+  sector: string;
+  reason: string;
+  skillsToBuild: string[];
+  firstStep: string;
+  occupationSource: string;
+  confidence: 'high' | 'medium' | 'low';
+};
+
+type ExploreResult = {
+  roles: ExploredRole[];
+  note: string;
+  model: string;
+  generatedAt: string;
+};
 type AppContextValue = {
   roles: WorkforceRole[]; signals: MarketSignal[]; loadingRoles: boolean; loadingSignals: boolean;
   rolesError: boolean; signalsError: boolean; refetchRoles: () => void; refetchSignals: () => void;
@@ -44,6 +61,7 @@ type AppContextValue = {
   trends?: TrendSnapshot; trendsLoading: boolean; trendsError: boolean; trendsRefreshing: boolean;
   refreshTrends: () => void;
   plan: AiPlan | null; planLoading: boolean; generatePlan: (input: ProfileData) => Promise<void>;
+  explored: ExploreResult | null; exploredLoading: boolean; generateExplore: (input: ProfileData) => Promise<void>;
 };
 const AppContext = createContext<AppContextValue | null>(null);
 const useApp = () => {
@@ -124,6 +142,35 @@ function AppContent() {
       setPlanLoading(false);
     }
   };
+  const [explored, setExplored] = useState<ExploreResult | null>(null);
+  const [exploredLoading, setExploredLoading] = useState(false);
+  // Roles the model proposes OUTSIDE the curated five. Same model, same profile;
+  // the difference is that these have no curated pathway, which the UI states.
+  const generateExplore = async (input: ProfileData) => {
+    setExploredLoading(true);
+    try {
+      const response = await fetch('/api/explore', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          profile: {
+            currentRole: input.currentRole,
+            industry: input.industry,
+            yearsExperience: input.yearsExperience,
+            skills: input.skills,
+            competencies: input.competencies,
+            targetSectors: input.targetSectors,
+          },
+        }),
+      });
+      if (!response.ok) return;
+      setExplored((await response.json()) as ExploreResult);
+    } catch {
+      // Non-fatal: the curated list still renders.
+    } finally {
+      setExploredLoading(false);
+    }
+  };
   const value: AppContextValue = {
     roles, signals, loadingRoles: rolesQuery.isLoading, loadingSignals: signalsQuery.isLoading,
     rolesError: !!rolesQuery.error, signalsError: !!signalsQuery.error,
@@ -134,6 +181,7 @@ function AppContent() {
     trends: trendsQuery.data, trendsLoading: trendsQuery.isLoading, trendsError: !!trendsQuery.error,
     trendsRefreshing: refreshingTrends, refreshTrends,
     plan, planLoading, generatePlan,
+    explored, exploredLoading, generateExplore,
   };
   return <TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppContext.Provider value={value}><WorkspaceShell /></AppContext.Provider></WouterRouter><Toaster /></TooltipProvider>;
 }
@@ -211,7 +259,7 @@ function ErrorState({ label, retry }: { label: string; retry: () => void }) { re
 function Metric({ label, value, caption, icon: Icon }: { label: string; value: string; caption: string; icon: typeof Gauge }) { return <div className="flex items-start gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary"><Icon size={17}/></div><div><div className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-muted-foreground">{label}</div><div className="mt-1 text-[18px] font-bold leading-none">{value}</div><div className="mt-1 text-[10px] text-muted-foreground">{caption}</div></div></div>; }
 
 function Dashboard() {
-  const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends, plan, planLoading } = useApp();
+  const { roles, loadingRoles, rolesError, refetchRoles, mode, setMode, scores, urgency, setSelectedRoleId, profile, trends, trendsLoading, trendsError, trendsRefreshing, refreshTrends, plan, planLoading, explored, exploredLoading } = useApp();
   const [search, setSearch] = useState('');
   const [showAllRoles, setShowAllRoles] = useState(false);
   const ordered = useMemo(() => {
@@ -258,6 +306,19 @@ function Dashboard() {
       <p className="font-display mt-2 text-[16px] font-semibold leading-snug">{plan.headline}</p>
       <p className="mt-1 text-[10px] text-muted-foreground">Ranked from the profile you submitted. First: <span className="font-semibold text-foreground">{plan.recommendedRoleTitle}</span></p>
     </div> : planLoading ? <div className="mb-5 rounded-2xl border border-border bg-card p-4 text-[11px] text-muted-foreground" role="status">Asking the AI to rank your roles…</div> : null}
+    {exploredLoading ? <div className="mb-5 rounded-2xl border border-border bg-card p-4 text-[11px] text-muted-foreground" role="status">Looking beyond our five curated roles…</div> : explored && explored.roles.length > 0 ? <section className="mb-6" data-testid="section-explored-roles">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <div><h2 className="font-display text-[20px] font-bold tracking-[-.04em]">Other roles the AI sees for you</h2><p className="mt-1 max-w-2xl text-[11px] text-muted-foreground">Outside our five curated roles. Real occupations with a reference you can check — but no verified pathway yet.</p></div>
+        <span className="rounded-full border border-accent/50 bg-accent/10 px-2.5 py-1 text-[9px] font-semibold">Exploratory · no pathway</span>
+      </div>
+      <div className="grid gap-4 xl:grid-cols-2">{explored.roles.map((role) => <article key={role.title} className="rounded-2xl border border-dashed border-border bg-card p-5" data-testid={`explored-card-${normalize(role.title)}`}>
+        <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-muted-foreground">{role.sector || 'Occupation'}</div><h3 className="font-display mt-1 text-[18px] font-bold leading-tight tracking-[-.03em]">{role.title}</h3></div><span className="shrink-0 rounded bg-secondary px-2 py-0.5 text-[8px] text-muted-foreground">{role.confidence}</span></div>
+        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{role.reason}</p>
+        {role.skillsToBuild.length > 0 ? <div className="mt-3"><div className="font-mono-ui text-[8px] uppercase tracking-[.14em] text-muted-foreground">Skills to build</div><div className="mt-1 flex flex-wrap gap-1">{role.skillsToBuild.map((skill) => <span key={skill} className="rounded border border-border px-1.5 py-0.5 text-[8px] text-muted-foreground">{skill}</span>)}</div></div> : null}
+        {role.firstStep ? <p className="mt-3 rounded-lg bg-primary/5 px-2.5 py-2 text-[10px] leading-relaxed"><span className="font-semibold">This week: </span>{role.firstStep}</p> : null}
+        <p className="mt-3 border-t border-border pt-2 text-[8px] leading-relaxed text-muted-foreground">Check it yourself: {role.occupationSource}</p>
+      </article>)}</div>
+    </section> : null}
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div><h2 className="font-display text-[20px] font-bold tracking-[-.04em]">{inMySectors ? 'Curated roles in the sectors you chose' : 'Curated roles, with verified pathways'}</h2><p className="mt-1 text-[11px] text-muted-foreground">{inMySectors ? <>Filtered to <span className="font-semibold text-foreground">{profile.targetSectors.join(', ')}</span> · {sectorMatches.length} of {ordered.length} roles. <button type="button" onClick={() => setShowAllRoles(true)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-show-all-roles">Show every role</button></> : profile.targetSectors.length > 0 ? <>Showing all {ordered.length} curated roles. <button type="button" onClick={() => setShowAllRoles(false)} className="font-semibold text-primary underline underline-offset-2" data-testid="button-only-my-sectors">Only my sectors</button></> : 'Five roles have a full pathway with course links and hours. Everything else below is a direction to research.'}</p></div>
       <label className="relative block w-full sm:w-[230px]"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search roles or sectors" className="focus-ring h-10 w-full rounded-xl border border-border bg-card pl-9 pr-3 text-[11px] outline-none" aria-label="Search roles" data-testid="input-search-roles"/></label>
@@ -295,7 +356,7 @@ function RoleCard({ role, profile, rank, score, urgency, onSelect, aiReason }: {
 }
 
 function ProfilePage() {
-  const { profile, setProfile, roles, mode, generatePlan, planLoading } = useApp();
+  const { profile, setProfile, roles, mode, generatePlan, planLoading, generateExplore, exploredLoading } = useApp();
   const [, navigate] = useLocation();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState(profile);
@@ -465,7 +526,7 @@ function ProfilePage() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
           <button disabled={step===0} onClick={() => setStep(step-1)} className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-profile-back"><ChevronLeft size={14}/>Back</button>
           <div className="flex items-center gap-3">{saved && <span className="flex items-center gap-1 text-[10px] text-primary" data-testid="status-profile-updated"><CheckCircle2 size={13}/>Updated for this session</span>}
-            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void generatePlan(draft).then(() => navigate('/')); }} disabled={planLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{planLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
+            {step < 3 ? <button onClick={() => { void saveAndContinue(); }} disabled={inferring} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-continue">{inferring ? 'Finding your skills…' : 'Save & continue'} <ArrowRight size={14}/></button> : <button onClick={() => { setProfile(draft); setSaved(true); void Promise.all([generatePlan(draft), generateExplore(draft)]).then(() => navigate('/')); }} disabled={planLoading || exploredLoading} className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground disabled:opacity-55" data-testid="button-profile-finish"><Check size={14}/>{planLoading || exploredLoading ? 'Asking the AI…' : 'Apply to role explorer'}</button>}</div>
         </div>
       </Card>
     </div>
