@@ -276,7 +276,7 @@ function WorkspaceShell() {
       </nav>
       <div className="px-3 pt-2">
         <Link href="/about" onClick={() => setMobileNav(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[11px] text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid="link-about">
-          <CircleHelp size={15}/> About this project
+          <CircleHelp size={15}/> {t.about.eyebrow}
         </Link>
       </div>
       <div className="mt-auto px-4 pb-5">

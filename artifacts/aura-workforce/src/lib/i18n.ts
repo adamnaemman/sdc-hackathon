@@ -25,6 +25,25 @@ type Copy = {
   };
   footer: { left: string; right: string };
   settings: { dark: string; light: string; language: string };
+  about: {
+    back: string;
+    eyebrow: string;
+    title: string;
+    intro: string;
+    teamTitle: string;
+    teamWho: string;
+    teamWhat: string;
+    linkEmail: string;
+    linkRepo: string;
+    linkLive: string;
+    refusesTitle: string;
+    refuses: string[];
+    refusesNote: string;
+    sourcesTitle: string;
+    builtTitle: string;
+    built: string;
+    disclaimer: string;
+  };
 };
 
 export const copy: Record<Lang, Copy> = {
@@ -49,6 +68,34 @@ export const copy: Record<Lang, Copy> = {
     },
     footer: { left: 'Directional estimates only. Your experience and judgment lead the way.', right: 'AURA · PRIVACY-FIRST PLANNING' },
     settings: { dark: 'Dark', light: 'Light', language: 'Language' },
+    about: {
+      back: 'Back to the planner',
+      eyebrow: 'About',
+      title: 'Built by one student, for people whose jobs are changing.',
+      intro:
+        'AURA-Workforce is a career-transition planner, not a job board and not a chatbot. It exists because the advice most workers receive is generic, static and unsourced — while the training they are told to buy is expensive and often already out of date.',
+      teamTitle: 'The team',
+      teamWho: 'Ahmad Adam Hakimi bin Naeman · International Islamic University Malaysia (IIUM)',
+      teamWhat:
+        'Built for SDC Hackathon 2026, Domain 1 — The Aiversecity Future-Ready Workforce Domain. Solo build: product, interface, API and documentation.',
+      linkEmail: 'Email',
+      linkRepo: 'Repository',
+      linkLive: 'Live prototype',
+      refusesTitle: 'What it refuses to do',
+      refuses: [
+        'Invent a job, a course, a provider or a statistic.',
+        'Claim a market figure is live when it is a saved snapshot.',
+        'Present a fit score as a verdict — every score is shown with its reasoning and its estimate.',
+        'Store a profile, an account or a CV. Everything lives in browser memory.',
+      ],
+      refusesNote:
+        'These are not marketing lines; they are enforced in code. The AI may only choose identifiers that already exist in the catalogue, and every returned identifier is validated before it reaches the screen.',
+      sourcesTitle: 'Sources',
+      builtTitle: 'Built with',
+      built:
+        'React 19, Vite, Tailwind CSS 4, TanStack Query, Wouter, Express 5, Zod, OpenAPI with Orval, TypeScript, pnpm workspaces. Hosted on Replit. Language model: DeepSeek (declared in the submission).',
+      disclaimer: 'Directional estimates only. Your experience and judgement lead the way.',
+    },
   },
   bm: {
     nav: { signals: '01 · Isyarat pasaran', profile: '02 · Profil anda', roles: '03 · Peranan masa depan', pathway: '04 · Laluan belajar' },
@@ -71,5 +118,33 @@ export const copy: Record<Lang, Copy> = {
     },
     footer: { left: 'Anggaran berarah sahaja. Pengalaman dan pertimbangan anda yang mendahului.', right: 'AURA · PERANCANGAN UTAMAKAN PRIVASI' },
     settings: { dark: 'Gelap', light: 'Cerah', language: 'Bahasa' },
+    about: {
+      back: 'Kembali ke perancang',
+      eyebrow: 'Tentang',
+      title: 'Dibina oleh seorang pelajar, untuk mereka yang kerjanya sedang berubah.',
+      intro:
+        'AURA-Workforce ialah perancang peralihan kerjaya — bukan papan kerja, bukan chatbot. Ia wujud kerana nasihat yang diterima kebanyakan pekerja bersifat generik, statik dan tanpa sumber, sedangkan latihan yang disuruh beli itu mahal dan sering sudah ketinggalan.',
+      teamTitle: 'Pasukan',
+      teamWho: 'Ahmad Adam Hakimi bin Naeman · Universiti Islam Antarabangsa Malaysia (IIUM)',
+      teamWhat:
+        'Dibina untuk SDC Hackathon 2026, Domain 1 — The Aiversecity Future-Ready Workforce Domain. Binaan solo: produk, antara muka, API dan dokumentasi.',
+      linkEmail: 'E-mel',
+      linkRepo: 'Repositori',
+      linkLive: 'Prototaip langsung',
+      refusesTitle: 'Apa yang ia enggan lakukan',
+      refuses: [
+        'Mereka pekerjaan, kursus, penyedia atau statistik.',
+        'Mendakwa angka pasaran itu langsung sedangkan ia snapshot tersimpan.',
+        'Menyampaikan skor padanan sebagai keputusan muktamad — setiap skor dipaparkan bersama sebab dan anggarannya.',
+        'Menyimpan profil, akaun atau CV. Semuanya kekal dalam memori pelayar.',
+      ],
+      refusesNote:
+        'Ini bukan ayat pemasaran; ia dikuatkuasakan dalam kod. AI hanya boleh memilih pengecam yang sudah wujud dalam katalog, dan setiap pengecam disahkan sebelum sampai ke skrin.',
+      sourcesTitle: 'Sumber',
+      builtTitle: 'Dibina dengan',
+      built:
+        'React 19, Vite, Tailwind CSS 4, TanStack Query, Wouter, Express 5, Zod, OpenAPI dengan Orval, TypeScript, pnpm workspaces. Dihoskan di Replit. Model bahasa: DeepSeek (diisytiharkan dalam submission).',
+      disclaimer: 'Anggaran berarah sahaja. Pengalaman dan pertimbangan anda yang mendahului.',
+    },
   },
 };
