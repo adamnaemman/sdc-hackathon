@@ -84,7 +84,27 @@ export function LearningPathSection({
   const totalHours = verified?.totalHours ?? 0;
   const hoursPerWeek = Math.max(1, weeklyHours);
   const totalWeeks = Math.max(1, Math.ceil(totalHours / hoursPerWeek));
+  const topics = verified?.topics ?? [];
   const busy = pathwayLoading;
+
+  // One shape for the printable version, whether the plan is verified steps or topics.
+  const printRows = steps.length > 0
+    ? steps.map((step) => ({
+        id: step.moduleId,
+        title: step.title,
+        hours: step.hours,
+        meta: step.provider ?? '',
+        why: step.why,
+        url: step.url ?? '',
+      }))
+    : topics.map((topic, index) => ({
+        id: `topic-${index}`,
+        title: topic.topic,
+        hours: topic.hours,
+        meta: topic.provider,
+        why: topic.why,
+        url: topic.searchUrl,
+      }));
 
   return (
     <section id="pathway" className="scroll-mt-24 border-t border-border py-10">
@@ -100,7 +120,7 @@ export function LearningPathSection({
         </p>
       </div>
 
-      {steps.length > 0 ? (
+      {steps.length > 0 || topics.length > 0 ? (
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -165,6 +185,22 @@ export function LearningPathSection({
                     >
                       {t.plan.searchOn} {topic.provider} <ExternalLink size={10} />
                     </a>
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => setOpenQr(openQr === `topic-${index}` ? null : `topic-${index}`)}
+                        className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[9px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                        data-testid={`button-qr-topic-${index}`}
+                      >
+                        <QrCode size={11} /> {t.plan.showQr}
+                      </button>
+                      {openQr === `topic-${index}` ? (
+                        <div className="mt-2 inline-flex flex-col items-start gap-1 rounded-lg border border-border bg-card p-2" data-testid={`qr-panel-topic-${index}`}>
+                          <img src={qrFor(topic.searchUrl)} alt={`QR code for ${topic.topic}`} width={110} height={110} loading="lazy" />
+                          <span className="max-w-[180px] break-all text-[8px] leading-snug text-muted-foreground">{topic.searchUrl}</span>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </li>
               ))}
@@ -332,18 +368,18 @@ export function LearningPathSection({
           {t.plan.printSub} · {totalHours} {t.plan.hours} · {totalWeeks} {t.plan.weeks} · {hoursPerWeek} h / {t.plan.weekLabel}
         </p>
         <ol className="mt-5 space-y-3">
-          {steps.map((step, index) => (
-            <li key={`print-${step.moduleId}`} className="qr-row flex items-start gap-3 border-b border-[#ddd] pb-3">
+          {printRows.map((row, index) => (
+            <li key={`print-${row.id}`} className="qr-row flex items-start gap-3 border-b border-[#ddd] pb-3">
               <span className="w-6 shrink-0 text-[11px]">{String(index + 1).padStart(2, '0')}</span>
               <div className="min-w-0 flex-1">
-                <div className="text-[12px] font-semibold">{step.title}</div>
+                <div className="text-[12px] font-semibold">{row.title}</div>
                 <div className="mt-0.5 text-[10px]">
-                  {step.hours} h · {step.provider ?? ''} · {t.plan.weekLabel} {Math.floor(steps.slice(0, index).reduce((sum, item) => sum + Number(item.hours || 0), 0) / hoursPerWeek) + 1}
+                  {row.hours} h · {row.meta} · {t.plan.weekLabel} {index + 1}
                 </div>
-                <div className="mt-1 text-[10px]">{step.why}</div>
-                {step.url ? <div className="mt-1 break-all text-[8px]">{step.url}</div> : null}
+                <div className="mt-1 text-[10px]">{row.why}</div>
+                {row.url ? <div className="mt-1 break-all text-[8px]">{row.url}</div> : null}
               </div>
-              {step.url ? <img src={qrFor(step.url)} alt="" width={84} height={84} /> : null}
+              {row.url ? <img src={qrFor(row.url)} alt="" width={84} height={84} /> : null}
             </li>
           ))}
         </ol>
