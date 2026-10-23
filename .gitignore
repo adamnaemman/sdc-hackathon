@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# runtime feedback submissions (never committed)
+artifacts/api-server/data/

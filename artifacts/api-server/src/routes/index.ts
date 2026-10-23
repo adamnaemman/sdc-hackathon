@@ -9,6 +9,7 @@ import libraryRouter from "./library";
 import pathwayRouter from "./pathway";
 import helpRouter from "./help";
 import greetRouter from "./greet";
+import feedbackRouter from "./feedback";
 
 const router: IRouter = Router();
 router.use(healthRouter);
@@ -21,5 +22,6 @@ router.use(libraryRouter);
 router.use(pathwayRouter);
 router.use(helpRouter);
 router.use(greetRouter);
+router.use(feedbackRouter);
 
 export default router;

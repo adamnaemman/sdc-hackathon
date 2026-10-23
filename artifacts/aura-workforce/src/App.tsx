@@ -9,7 +9,7 @@ import {
   Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check,
   CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Compass, ExternalLink,
   FileText, Gauge, GraduationCap, Leaf, Menu, RotateCcw, ShieldCheck,
-  Sparkles, Target, TrendingUp, Users, X, Clock3, CircleDot, Search, AlertTriangle
+  Sparkles, Target, TrendingUp, Users, X, Clock3, CircleDot, Search, AlertTriangle, MessageSquare
 } from 'lucide-react';
 import { useHealthCheck, useListMarketSignals, useListWorkforceRoles } from '@workspace/api-client-react';
 import type { MarketSignal, WorkforceRole } from '@workspace/api-client-react';
@@ -21,6 +21,7 @@ import { HeroSection } from '@/components/hero-section';
 import { AboutPage } from '@/components/about-page';
 import { WelcomeDialog } from '@/components/welcome-dialog';
 import { AskAura } from '@/components/ask-aura';
+import { FeedbackPage } from '@/components/feedback-page';
 import { SettingsProvider, SettingsControls, useSettings } from '@/lib/settings';
 import { signalBm } from '@/lib/signal-translations';
 import { profileCopy } from '@/lib/profile-i18n';
@@ -297,6 +298,9 @@ function WorkspaceShell() {
         <Link href="/about" onClick={() => setMobileNav(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[11px] text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid="link-about">
           <CircleHelp size={15}/> {t.about.eyebrow}
         </Link>
+        <Link href="/feedback" onClick={() => setMobileNav(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[11px] text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground" data-testid="link-feedback">
+          <MessageSquare size={15}/> Feedback
+        </Link>
       </div>
       <div className="mt-auto px-4 pb-5">
         <div className="privacy-note rounded-2xl border border-sidebar-foreground/10 bg-sidebar-foreground/[.035] p-4">
@@ -317,7 +321,7 @@ function WorkspaceShell() {
       </header>
       <main className="mx-auto w-full max-w-[1500px] px-4 sm:px-7 lg:px-10">
         <ErrorBoundary>
-          {location === '/about' ? <AboutPage/> : <>
+          {location === '/about' ? <AboutPage/> : location === '/feedback' ? <FeedbackPage/> : <>
           <WelcomeDialog/>
           <HeroSection/>
 
