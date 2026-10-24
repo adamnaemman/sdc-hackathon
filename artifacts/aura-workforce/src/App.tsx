@@ -31,8 +31,6 @@ import { type DisruptionMode, type ProfileData, hasProfileSkill, normalize, scor
 
 const queryClient = new QueryClient();
 
-type DisruptionMode = 'Moderate' | 'Aggressive';
-
 type AiPlan = {
   recommendedRoleId: string;
   recommendedRoleTitle: string;
@@ -279,7 +277,8 @@ function WorkspaceShell() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
   const [mobileNav, setMobileNav] = useState(false);
-  const title = navItems.find((item) => item.href === location)?.label ?? 'Workspace';
+  const currentNav = navItems.find((item) => item.href === location);
+  const title = currentNav ? t.nav[currentNav.key] : 'Workspace';
   return <div className="aura-shell flex bg-background text-foreground">
     <aside className={`sidebar fixed inset-y-0 left-0 z-40 flex w-[258px] flex-col bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${mobileNav ? 'translate-x-0' : '-translate-x-full'}`} data-testid="navigation-sidebar">
       <Link href="/" className="flex items-center gap-3 px-6 pt-7 pb-8" data-testid="link-home">
