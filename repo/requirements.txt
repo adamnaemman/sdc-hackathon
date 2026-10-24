@@ -1,0 +1,9 @@
+# The application is Node.js + TypeScript (see package.json).
+# These Python packages are only used to regenerate the written submissions and
+# the marketing assets in docs/. Nothing at runtime imports them.
+
+Pillow>=10.0          # 4K motion frames, intro sequence, device mockups
+python-pptx>=0.6.21   # the pitch deck
+python-docx>=1.1.0    # the PRD and the technical declaration
+reportlab>=4.0        # the two PDF references shipped in web/public
+pypdf>=3.17           # merging and checking the exported PDFs
