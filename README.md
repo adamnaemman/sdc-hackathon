@@ -8,23 +8,28 @@ study plan built around the hours they actually have.
 
 ## Team
 
-| | |
+| Field | Details |
 |---|---|
 | **Team name** | overinfinity |
-| **Members** | Ahmad Adam Hakimi bin Naeman — International Islamic University Malaysia (IIUM) |
-| **Domain** | Domain 1 — The Aiversecity Future-Ready Workforce Domain |
-| **SDG track** | 4.4 (primary), 4.3, 8.5, 8.2 |
+| **Team Domain** | Domain 1 — The Aiversecity Future-Ready Workforce Domain |
+| **SDG track (1-17)** | 4.4 (primary), 4.3, 8.5, 8.2 |
+| **Team Leader** | Ahmad Adam Hakimi bin Naeman (IIUM) |
+| **University** | International Islamic University Malaysia (IIUM) |
+| **Team Members** | Amru Hazem bin Ahmad Tarmizi (IIUM), Muhammad Hadif Iddin bin Abdul Shukur (IIUM) |
+
+
 
 ## Links
 
 | | |
 |---|---|
+| **GitHub Repository** | https://github.com/adamnaemman/sdc-hackathon |
+| **Replit Project** | https://replit.com/@adamnaeman/AURA-Workforce |
 | **Live demo** | https://aura-workforce.replit.app/ |
 | **Pitch video** | _paste the YouTube link here_ |
-| **Repository** | https://github.com/adamnaemman/sdc-hackathon |
 | **PRD** | [`docs/SDC2026_overinfinity_Preliminary.pdf`](docs/SDC2026_overinfinity_Preliminary.pdf) |
 | **Technical & Tools Declaration** | [`docs/SDC2026_overinfinity_TechDeclaration.pdf`](docs/SDC2026_overinfinity_TechDeclaration.pdf) |
-| **Pitch deck** | [`docs/PITCH DECK OVERINFINITY.pdf`](docs/AURA-Workforce-Deck.pdf) |
+| **Slide deck** | [`docs/PITCH DECK OVERINFINITY.pdf`](docs/AURA-Workforce-Deck.pdf), Canva link - https://canva.link/roz4g9e4dydd4gr |
 
 ## How to run the project
 
