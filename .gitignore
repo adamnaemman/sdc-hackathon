@@ -1,4 +1,4 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+﻿# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # compiled output
 dist
@@ -50,3 +50,11 @@ Thumbs.db
 
 # runtime feedback submissions (never committed)
 artifacts/api-server/data/
+# consolidated copies and render frames (large, not part of the app)
+repo/
+source-bundle/
+docs/ads4k/frames/
+docs/intro/frames/
+docs/deck-preview/
+attached_assets/
+
