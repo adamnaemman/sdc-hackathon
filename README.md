@@ -24,7 +24,7 @@ study plan built around the hours they actually have.
 | **Repository** | https://github.com/adamnaemman/sdc-hackathon |
 | **PRD** | [`docs/SDC2026_overinfinity_Preliminary.pdf`](docs/SDC2026_overinfinity_Preliminary.pdf) |
 | **Technical & Tools Declaration** | [`docs/SDC2026_overinfinity_TechDeclaration.pdf`](docs/SDC2026_overinfinity_TechDeclaration.pdf) |
-| **Pitch deck** | [`docs/AURA-Workforce-Deck.pdf`](docs/AURA-Workforce-Deck.pdf) |
+| **Pitch deck** | [`docs/PITCH DECK OVERINFINITY.pdf`](docs/AURA-Workforce-Deck.pdf) |
 
 ## How to run the project
 
@@ -88,12 +88,6 @@ app served at `aura-workforce.replit.app`. Replit **Secrets** hold
 `DEEPSEEK_API_KEY`, so no credential is ever committed, and the Replit shell is how
 we sync the workspace to GitHub (`git fetch && git reset --hard origin/adam`, see
 `scripts/repl-sync.sh` — the Repl is a mirror, never the source of truth).
-
-**RunPod** is reserved for Phase 2. We registered the team account and kept the
-**USD 20 credit** for a self-hosted model: the planner speaks the OpenAI-compatible
-chat-completions protocol, so moving from the hosted DeepSeek endpoint to a model on
-a RunPod GPU is a base-URL change, not a rewrite. Nothing in the current build calls
-RunPod, and we say so rather than implying otherwise.
 
 ---
 
