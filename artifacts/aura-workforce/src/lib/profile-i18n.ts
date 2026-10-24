@@ -93,7 +93,7 @@ export const profileCopy: Record<Lang, ProfileCopy> = {
     privacyBody: 'Profile details never leave the browser session. They are only used for local fit estimates.',
     notSaved: 'Not saved to an account',
     description:
-      'A synthetic procurement example is loaded so you can explore the planner immediately. Edit it freely; your answers stay in memory and clear when this session ends.',
+      'Four short steps, no account. The hints show a typical answer; type your own and the planner adjusts. Everything stays in this browser session.',
     steps: ['Starting point', 'Your strengths', 'Where to next', 'Time to learn'],
     stepWord: 'Step',
     ofWord: 'of',
@@ -101,10 +101,10 @@ export const profileCopy: Record<Lang, ProfileCopy> = {
 
     roleLabel: 'Current role',
     roleHint: 'What best describes your work today?',
-    rolePlaceholder: 'e.g. Customer service team lead',
+    rolePlaceholder: 'e.g. Procurement Assistant',
     industryLabel: 'Industry',
     industryHint: 'Your current field or sector — pick one or type your own',
-    industryPlaceholder: 'e.g. Healthcare',
+    industryPlaceholder: 'e.g. Procurement and operations',
     yearsLabel: 'Years of experience',
     yearsHint: 'Across your working life',
     yearsSuffix: 'years',
@@ -177,7 +177,7 @@ export const profileCopy: Record<Lang, ProfileCopy> = {
     privacyBody: 'Butiran profil tidak pernah meninggalkan sesi pelayar. Ia hanya digunakan untuk anggaran padanan setempat.',
     notSaved: 'Tidak disimpan ke akaun',
     description:
-      'Contoh perolehan sintetik dimuatkan supaya anda boleh terus meneroka perancang. Ubah dengan bebas; jawapan anda kekal dalam memori dan hilang apabila sesi tamat.',
+      'Empat langkah pendek, tanpa akaun. Petunjuk menunjukkan jawapan lazim; taip jawapan anda sendiri dan perancang akan menyesuaikan. Semuanya kekal dalam sesi pelayar ini.',
     steps: ['Titik permulaan', 'Kekuatan anda', 'Ke mana seterusnya', 'Masa untuk belajar'],
     stepWord: 'Langkah',
     ofWord: 'daripada',
@@ -185,10 +185,10 @@ export const profileCopy: Record<Lang, ProfileCopy> = {
 
     roleLabel: 'Peranan semasa',
     roleHint: 'Apa yang paling tepat menggambarkan kerja anda hari ini?',
-    rolePlaceholder: 'cth. Ketua pasukan khidmat pelanggan',
+    rolePlaceholder: 'cth. Procurement Assistant',
     industryLabel: 'Industri',
     industryHint: 'Bidang atau sektor anda sekarang — pilih satu atau taip sendiri',
-    industryPlaceholder: 'cth. Kesihatan',
+    industryPlaceholder: 'cth. Procurement and operations',
     yearsLabel: 'Tahun pengalaman',
     yearsHint: 'Sepanjang hayat bekerja anda',
     yearsSuffix: 'tahun',

@@ -102,7 +102,7 @@ const useApp = () => {
   return value;
 };
 const initialProfile: ProfileData = {
-  currentRole: 'Procurement Assistant', industry: 'Procurement & operations', yearsExperience: 7,
+  currentRole: '', industry: '', yearsExperience: 0,
   skills: ['Vendor communication', 'Manual PO processing', 'Microsoft Excel', 'Inventory auditing'],
   competencies: ['Communication', 'Attention to detail', 'Organization'],
   targetSectors: ['Smart logistics', 'Technology'],
@@ -513,7 +513,9 @@ function ProfilePage() {
       setInferring(true);
       setSkillsSource(null);
       try {
-        const text = `${draft.currentRole || 'A worker'} in ${draft.industry || 'an unspecified industry'}, ${draft.yearsExperience} years of experience.`;
+        // The placeholders are examples, not values: if a field is still empty we
+        // send the example so the suggestion is useful instead of generic.
+        const text = `${draft.currentRole || 'Procurement Assistant'} in ${draft.industry || 'Procurement and operations'}, ${draft.yearsExperience} years of experience.`;
         const response = await fetch('/api/extract', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -589,7 +591,7 @@ function ProfilePage() {
           <Field label={p.industryLabel} hint={p.industryHint}><input value={draft.industry} onChange={(e) => update('industry', e.target.value)} list="industry-options" placeholder={p.industryPlaceholder} className="form-input" data-testid="input-industry"/><datalist id="industry-options">
             {['Healthcare','Education','Public services','Procurement & operations','Logistics & transport','Retail & e-commerce','Manufacturing','Financial services','Construction','Hospitality & tourism','Technology','Telecommunications','Energy & utilities','Agriculture','Media & creative','Professional services','Community services','Oil, gas & chemicals'].map((option) => <option key={option} value={option}/>)}
           </datalist></Field>
-          <Field label={p.yearsLabel} hint={p.yearsHint}><div className="relative"><input min="0" max="60" type="number" value={draft.yearsExperience} onChange={(e) => update('yearsExperience', Number(e.target.value))} className="form-input pr-16" data-testid="input-years-experience"/><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">{p.yearsSuffix}</span></div></Field>
+          <Field label={p.yearsLabel} hint={p.yearsHint}><div className="flex items-center gap-4"><input type="range" min="0" max="40" step="1" value={draft.yearsExperience} onChange={(e) => update('yearsExperience', Number(e.target.value))} className="w-full accent-[hsl(var(--primary))]" aria-label={p.yearsLabel} data-testid="input-years-experience"/><span className="w-20 shrink-0 text-right font-mono-ui text-[14px] font-medium" data-testid="text-years-value">{draft.yearsExperience} <span className="text-[11px] font-normal text-muted-foreground">{p.yearsSuffix}</span></span></div></Field>
           <div className="rounded-xl bg-secondary/50 p-4"><div className="text-[12px] font-semibold">{p.startTitle}</div><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{p.startBody}</p></div>
         </div>}
         {step === 1 && <div className="space-y-6">
