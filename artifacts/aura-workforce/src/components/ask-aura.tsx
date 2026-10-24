@@ -65,8 +65,8 @@ export function AskAura() {
         >
           <div className="flex items-start justify-between gap-2 border-b border-border bg-secondary/40 px-4 py-3">
             <div>
-              <p className="font-display text-[14px] font-bold tracking-[-.02em]">{t.ask.title}</p>
-              <p className="mt-0.5 text-[9.5px] leading-relaxed text-muted-foreground">{t.ask.subtitle}</p>
+              <p className="font-display text-[15px] font-bold tracking-[-.02em]">{t.ask.title}</p>
+              <p className="mt-0.5 text-[10.5px] leading-relaxed text-muted-foreground">{t.ask.subtitle}</p>
             </div>
             <button
               type="button"
@@ -87,7 +87,7 @@ export function AskAura() {
                     key={suggestion}
                     type="button"
                     onClick={() => void ask(suggestion)}
-                    className="block w-full rounded-xl border border-border/70 bg-background px-3 py-2 text-left text-[10px] leading-relaxed transition-colors hover:border-primary/40 hover:bg-secondary/40"
+                    className="block w-full rounded-xl border border-border/70 bg-background px-3 py-2 text-left text-[11px] leading-relaxed transition-colors hover:border-primary/40 hover:bg-secondary/40"
                     data-testid="button-ask-suggestion"
                   >
                     {suggestion}
@@ -99,7 +99,7 @@ export function AskAura() {
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`max-w-[92%] rounded-xl px-3 py-2 text-[10.5px] leading-relaxed ${
+                className={`max-w-[92%] rounded-xl px-3 py-2 text-[11.5px] leading-relaxed ${
                   message.role === 'user'
                     ? 'ml-auto bg-primary text-primary-foreground'
                     : 'bg-secondary/60 text-foreground'
@@ -110,7 +110,7 @@ export function AskAura() {
             ))}
 
             {busy ? (
-              <div className="w-fit rounded-xl bg-secondary/60 px-3 py-2 text-[10px] text-muted-foreground">
+              <div className="w-fit rounded-xl bg-secondary/60 px-3 py-2 text-[11px] text-muted-foreground">
                 {t.ask.thinking}
               </div>
             ) : null}
@@ -128,7 +128,7 @@ export function AskAura() {
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder={t.ask.placeholder}
-                className="focus-ring min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-[10.5px] outline-none placeholder:text-muted-foreground/70"
+                className="focus-ring min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-[11.5px] outline-none placeholder:text-muted-foreground/70"
                 data-testid="input-ask-aura"
               />
               <button
@@ -141,7 +141,7 @@ export function AskAura() {
                 <Send size={13} />
               </button>
             </div>
-            <p className="mt-1.5 px-1 text-[8px] leading-relaxed text-muted-foreground">{t.ask.disclaimer}</p>
+            <p className="mt-1.5 px-1 text-[9px] leading-relaxed text-muted-foreground">{t.ask.disclaimer}</p>
           </form>
         </div>
       ) : null}
@@ -149,7 +149,7 @@ export function AskAura() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="fixed bottom-4 right-4 z-[65] inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-[10px] font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(20,40,36,.6)] transition-transform hover:-translate-y-0.5"
+        className="fixed bottom-4 right-4 z-[65] inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-[11px] font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(20,40,36,.6)] transition-transform hover:-translate-y-0.5"
         data-testid="button-ask-aura"
       >
         <MessageCircle size={14} />

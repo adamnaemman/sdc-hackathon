@@ -83,7 +83,7 @@ export function WelcomeDialog() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Sparkles size={14} />
             </span>
-            <span className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">
+            <span className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-muted-foreground">
               {t.welcome.label}
             </span>
           </div>
@@ -97,26 +97,26 @@ export function WelcomeDialog() {
           </button>
         </div>
 
-        <h2 id="welcome-title" className="font-display mt-4 text-[24px] font-bold leading-tight tracking-[-.04em]">
+        <h2 id="welcome-title" className="font-display mt-4 text-[25px] font-bold leading-tight tracking-[-.04em]">
           {t.welcome.title}
         </h2>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">{t.welcome.sub}</p>
+        <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">{t.welcome.sub}</p>
 
         <ul className="mt-4 space-y-2">
           {t.welcome.items.map((item) => (
-            <li key={item} className="rounded-xl bg-secondary/45 px-3 py-2 text-[10.5px] leading-relaxed">
+            <li key={item} className="rounded-xl bg-secondary/45 px-3 py-2 text-[11.5px] leading-relaxed">
               {item}
             </li>
           ))}
         </ul>
 
-        <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground">{t.welcome.privacy}</p>
+        <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">{t.welcome.privacy}</p>
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={dismissForSession}
-            className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground"
+            className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[11px] font-semibold text-primary-foreground"
             data-testid="button-welcome-start"
           >
             {t.welcome.start} <ArrowRight size={13} />
@@ -124,7 +124,7 @@ export function WelcomeDialog() {
           <button
             type="button"
             onClick={dismissForever}
-            className="focus-ring rounded-lg px-3 py-2.5 text-[10px] font-semibold text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
+            className="focus-ring rounded-lg px-3 py-2.5 text-[11px] font-semibold text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
             data-testid="button-welcome-never"
           >
             {t.welcome.never}

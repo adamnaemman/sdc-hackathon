@@ -108,11 +108,11 @@ export function AuraAvatar() {
       </div>
 
       <div className="relative max-w-[20rem] rounded-2xl rounded-bl-sm border border-border bg-card/95 px-4 py-3 shadow- lg:max-w-[28rem] lg:px-5 lg:py-4[0_10px_30px_-18px_rgba(20,40,36,.5)]">
-        <p className="text-[11px] leading-relaxed text-foreground sm:text-[12px] lg:text-[14px]" data-testid="text-aura-line">
+        <p className="text-[12px] leading-relaxed text-foreground sm:text-[13px] lg:text-[15px]" data-testid="text-aura-line">
           {typed || '\u00A0'}
           {typed.length < line.length ? <span className="ml-0.5 inline-block w-[2px] animate-pulse bg-foreground align-middle">&nbsp;</span> : null}
         </p>
-        <span className="mt-1.5 block font-mono-ui text-[8px] uppercase tracking-[.16em] text-muted-foreground lg:text-[9px]">AURA · guide</span>
+        <span className="mt-1.5 block font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground lg:text-[10px]">AURA · guide</span>
       </div>
     </div>
   );

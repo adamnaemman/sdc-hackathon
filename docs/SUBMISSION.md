@@ -8,7 +8,7 @@ Everything below is ready except the video. Submit at **sdchack.my** before **25
 |---|---|---|---|
 | 1 | Product Requirement Document (official template) | `docs/SDC2026_overinfinity_Preliminary.pdf` | ✅ 973 KB |
 | 2 | Technical & Tools Declaration | `docs/SDC2026_overinfinity_TechDeclaration.pdf` | ✅ 1,094 KB |
-| 3 | Pitch deck | `docs/AURA-Workforce-Deck.pdf` (9 slides) | ✅ 107 KB |
+| 3 | Pitch deck | `docs/AURA-Workforce-Deck.pdf` (12 slides, 16:9) | ✅ rebuilt |
 | 4 | Live prototype | https://aura-workforce.replit.app/ | ✅ deployed |
 | 5 | GitHub repository | https://github.com/adamnaemman/sdc-hackathon | ✅ |
 | 6 | Pitching video (5–7 min, YouTube) | — | ⬜ record + upload |

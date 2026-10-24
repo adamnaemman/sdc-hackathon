@@ -52,12 +52,12 @@ export function HeroSection() {
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Compass size={19} strokeWidth={2.2} />
           </span>
-          <span className="font-mono-ui text-[10px] uppercase tracking-[.26em] text-muted-foreground">
+          <span className="font-mono-ui text-[11px] uppercase tracking-[.26em] text-muted-foreground">
             AURA · Workforce
           </span>
         </div>
 
-        <h1 className="font-display mt-8 text-[46px] font-bold leading-[.95] tracking-[-.065em] sm:text-[84px]">
+        <h1 className="font-display mt-8 text-[47px] font-bold leading-[.95] tracking-[-.065em] sm:text-[85px]">
           {t.hero.titleA}
           <br />
           <span className="text-primary">{t.hero.titleB}</span>
@@ -68,20 +68,20 @@ export function HeroSection() {
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <a
             href="#signals"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-[11px] font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-[12px] font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
             data-testid="hero-start"
           >
             {t.hero.cta1} <ArrowRight size={14} />
           </a>
           <a
             href="#profile"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-3 text-[11px] font-semibold transition-colors hover:border-primary/40"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-3 text-[12px] font-semibold transition-colors hover:border-primary/40"
           >
             {t.hero.cta2}
           </a>
         </div>
 
-        <div className="mt-9 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">
+        <div className="mt-9 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-muted-foreground">
           <span>{t.hero.chip1}</span>
           <span className="text-accent">·</span>
           <span>{t.hero.chip2}</span>
@@ -91,7 +91,7 @@ export function HeroSection() {
 
         <a
           href="#signals"
-          className="mt-10 inline-flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.22em] text-muted-foreground transition-colors hover:text-foreground"
+          className="mt-10 inline-flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.22em] text-muted-foreground transition-colors hover:text-foreground"
           aria-label={t.hero.scroll}
         >
           <ChevronDown size={14} className="animate-bounce" />

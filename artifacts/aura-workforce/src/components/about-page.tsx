@@ -26,36 +26,36 @@ export function AboutPage() {
     <div className="mx-auto max-w-3xl py-10" data-testid="page-about">
       <a
         href="/"
-        className="inline-flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.18em] text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.18em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft size={12} /> {about.back}
       </a>
 
-      <div className="mt-6 mb-3 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.19em] text-muted-foreground">
+      <div className="mt-6 mb-3 flex items-center gap-2 font-mono-ui text-[11px] uppercase tracking-[.19em] text-muted-foreground">
         <span className="h-px w-5 bg-accent" />
         {about.eyebrow}
       </div>
 
-      <h1 className="font-display text-[36px] font-bold leading-[1.05] tracking-[-.055em] sm:text-[46px]">
+      <h1 className="font-display text-[37px] font-bold leading-[1.05] tracking-[-.055em] sm:text-[47px]">
         {about.title}
       </h1>
 
-      <p className="mt-5 text-[13px] leading-relaxed text-muted-foreground">{about.intro}</p>
+      <p className="mt-5 text-[14px] leading-relaxed text-muted-foreground">{about.intro}</p>
 
       <section className="mt-10">
-        <h2 className="font-display text-[20px] font-bold tracking-[-.03em]">{about.teamTitle}</h2>
+        <h2 className="font-display text-[21px] font-bold tracking-[-.03em]">{about.teamTitle}</h2>
         <div className="mt-3 rounded-2xl border border-border bg-card p-5">
-          <p className="text-[13px] font-semibold">overinfinity</p>
-          <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{about.teamWho}</p>
-          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{about.teamWhat}</p>
+          <p className="text-[14px] font-semibold">overinfinity</p>
+          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{about.teamWho}</p>
+          <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{about.teamWhat}</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <a href="mailto:0damkim254@gmail.com" className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary underline underline-offset-2">
+            <a href="mailto:0damkim254@gmail.com" className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary underline underline-offset-2">
               <Mail size={11} /> {about.linkEmail}
             </a>
-            <a href="https://github.com/adamnaemman/sdc-hackathon" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary underline underline-offset-2">
+            <a href="https://github.com/adamnaemman/sdc-hackathon" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary underline underline-offset-2">
               {about.linkRepo} <ExternalLink size={10} />
             </a>
-            <a href="https://aura-workforce.replit.app/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary underline underline-offset-2">
+            <a href="https://aura-workforce.replit.app/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary underline underline-offset-2">
               {about.linkLive} <ExternalLink size={10} />
             </a>
           </div>
@@ -63,17 +63,17 @@ export function AboutPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-[20px] font-bold tracking-[-.03em]">{about.refusesTitle}</h2>
-        <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-muted-foreground">
+        <h2 className="font-display text-[21px] font-bold tracking-[-.03em]">{about.refusesTitle}</h2>
+        <ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-muted-foreground">
           {about.refuses.map((line) => (
             <li key={line}>· {line}</li>
           ))}
         </ul>
-        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{about.refusesNote}</p>
+        <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{about.refusesNote}</p>
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-[20px] font-bold tracking-[-.03em]">{about.sourcesTitle}</h2>
+        <h2 className="font-display text-[21px] font-bold tracking-[-.03em]">{about.sourcesTitle}</h2>
         <div className="mt-3 overflow-hidden rounded-2xl border border-border">
           {SOURCES.map((source) => (
             <a
@@ -83,19 +83,19 @@ export function AboutPage() {
               rel="noreferrer"
               className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 transition-colors last:border-b-0 hover:bg-secondary/40"
             >
-              <span className="text-[11px] font-semibold">{source.name}</span>
-              <span className="font-mono-ui text-[9px] text-muted-foreground">{source.note} ↗</span>
+              <span className="text-[12px] font-semibold">{source.name}</span>
+              <span className="font-mono-ui text-[10px] text-muted-foreground">{source.note} ↗</span>
             </a>
           ))}
         </div>
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-[20px] font-bold tracking-[-.03em]">{about.builtTitle}</h2>
-        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{about.built}</p>
+        <h2 className="font-display text-[21px] font-bold tracking-[-.03em]">{about.builtTitle}</h2>
+        <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">{about.built}</p>
       </section>
 
-      <p className="mt-12 border-t border-border pt-5 text-[10px] leading-relaxed text-muted-foreground">
+      <p className="mt-12 border-t border-border pt-5 text-[11px] leading-relaxed text-muted-foreground">
         {about.disclaimer}
       </p>
     </div>

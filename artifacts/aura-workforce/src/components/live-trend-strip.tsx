@@ -51,23 +51,23 @@ export function LiveTrendStrip({ snapshot, isLoading, isError, isRefreshing, onR
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isError || snapshot?.stale ? 'bg-accent' : 'bg-[hsl(var(--chart-1))]'}`} />
-            <span className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-muted-foreground">{t.trend.label}</span>
+            <span className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-muted-foreground">{t.trend.label}</span>
             {snapshot?.cached && !snapshot.stale ? (
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-[8px] text-secondary-foreground">{t.trend.cached}</span>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-[9px] text-secondary-foreground">{t.trend.cached}</span>
             ) : null}
             {snapshot?.stale ? (
-              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[8px] text-foreground">{t.trend.stale}</span>
+              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[9px] text-foreground">{t.trend.stale}</span>
             ) : null}
           </div>
 
           {isLoading ? (
-            <p className="mt-2 text-[11px] text-muted-foreground">{t.trend.loading}</p>
+            <p className="mt-2 text-[12px] text-muted-foreground">{t.trend.loading}</p>
           ) : isError ? (
-            <p className="mt-2 max-w-xl text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-2 max-w-xl text-[12px] leading-relaxed text-muted-foreground">
               {t.trend.error}
             </p>
           ) : snapshot ? (
-            <p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-2 max-w-2xl text-[12px] leading-relaxed text-muted-foreground">
               <span className="font-semibold text-foreground">{snapshot.source}</span>
               {' · '}
               {snapshot.sampleSize} {t.trend.postings} {snapshot.windowDays} {t.trend.days}
@@ -85,7 +85,7 @@ export function LiveTrendStrip({ snapshot, isLoading, isError, isRefreshing, onR
           type="button"
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="focus-ring inline-flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-2 text-[10px] font-semibold transition-colors hover:border-primary/40 disabled:opacity-50"
+          className="focus-ring inline-flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-2 text-[11px] font-semibold transition-colors hover:border-primary/40 disabled:opacity-50"
           data-testid="button-refresh-trends"
         >
           <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
@@ -96,10 +96,10 @@ export function LiveTrendStrip({ snapshot, isLoading, isError, isRefreshing, onR
       {skills.length > 0 && weeks.length > 0 ? (
         <div className="mt-5">
           <div className="flex items-baseline justify-between">
-            <span className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">
+            <span className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-muted-foreground">
               {t.trend.chartTitle}
             </span>
-            <span className="font-mono-ui text-[9px] text-muted-foreground">{t.trend.lastWeeks}</span>
+            <span className="font-mono-ui text-[10px] text-muted-foreground">{t.trend.lastWeeks}</span>
           </div>
 
           <svg
@@ -164,17 +164,17 @@ export function LiveTrendStrip({ snapshot, isLoading, isError, isRefreshing, onR
 
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5">
             {skills.map((skill, index) => (
-              <span key={skill.name} className="inline-flex items-center gap-1.5 text-[9px] text-muted-foreground">
+              <span key={skill.name} className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: `hsl(var(--chart-${(index % 5) + 1}))` }} />
                 {skill.name}
-                <span className="font-mono-ui text-[8px]">({skill.count})</span>
+                <span className="font-mono-ui text-[9px]">({skill.count})</span>
               </span>
             ))}
           </div>
         </div>
       ) : null}
 
-      <p className="mt-3 text-[9px] leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
         {t.trend.note}
       </p>
     </section>

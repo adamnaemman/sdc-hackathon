@@ -99,7 +99,7 @@ export function SettingsControls() {
             type="button"
             onClick={() => setLang(option)}
             aria-pressed={lang === option}
-            className={`focus-ring rounded-md px-2 py-1 text-[9px] font-semibold uppercase tracking-[.1em] transition-colors ${
+            className={`focus-ring rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-[.1em] transition-colors ${
               lang === option ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
             data-testid={`button-lang-${option}`}

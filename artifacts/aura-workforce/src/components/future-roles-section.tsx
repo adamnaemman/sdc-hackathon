@@ -45,13 +45,13 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
   return (
     <section id="roles" className="scroll-mt-24 border-t border-border py-10">
       <div className="mb-6">
-        <div className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.19em] text-muted-foreground">
+        <div className="mb-3 flex items-center gap-2 font-mono-ui text-[11px] uppercase tracking-[.19em] text-muted-foreground">
           <span className="h-px w-5 bg-accent" />{t.cp.threeEyebrow}
         </div>
-        <h2 className="font-display max-w-3xl text-[32px] font-bold leading-[1.1] tracking-[-.055em] sm:text-[40px]">
+        <h2 className="font-display max-w-3xl text-[33px] font-bold leading-[1.1] tracking-[-.055em] sm:text-[41px]">
           {t.cp.threeTitle}
         </h2>
-        <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-muted-foreground">
           {t.cp.threeSub}
         </p>
       </div>
@@ -68,12 +68,12 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
       {!exploredLoading && roles.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center" data-testid="future-roles-empty">
           <Sparkles size={20} className="mx-auto text-primary" />
-          <p className="font-display mt-3 text-[17px] font-bold">Nothing proposed yet</p>
-          <p className="mx-auto mt-1 max-w-md text-[11px] leading-relaxed text-muted-foreground">
+          <p className="font-display mt-3 text-[18px] font-bold">Nothing proposed yet</p>
+          <p className="mx-auto mt-1 max-w-md text-[12px] leading-relaxed text-muted-foreground">
             Fill in checkpoint 2 and press <span className="font-semibold">Apply to role explorer</span> — the
             roles are generated from your answers, so there is nothing to show before that.
           </p>
-          <a href="#profile" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[10px] font-semibold text-primary-foreground">
+          <a href="#profile" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[11px] font-semibold text-primary-foreground">
             Go to your profile <ArrowUpRight size={12} />
           </a>
         </div>
@@ -82,11 +82,11 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
       {roles.length > 0 ? (
         <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               {roles.length} occupations · proposed by <span className="font-semibold text-foreground">{explored?.model}</span>{' '}
               · {explored ? new Date(explored.generatedAt).toLocaleString('en-GB') : ''}
             </p>
-            <span className="rounded-full border border-accent/50 bg-accent/10 px-2.5 py-1 text-[9px] font-semibold">
+            <span className="rounded-full border border-accent/50 bg-accent/10 px-2.5 py-1 text-[10px] font-semibold">
               AI-selected · no verified pathway
             </span>
           </div>
@@ -100,28 +100,28 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="font-mono-ui text-[8px] uppercase tracking-[.15em] text-muted-foreground">
+                    <div className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-muted-foreground">
                       {role.sector || 'Occupation'}
                     </div>
-                    <h3 className="font-display mt-1 text-[18px] font-bold leading-tight tracking-[-.035em]">
+                    <h3 className="font-display mt-1 text-[19px] font-bold leading-tight tracking-[-.035em]">
                       {role.title}
                     </h3>
                   </div>
-                  <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 text-[8px] text-muted-foreground">
+                  <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground">
                     {role.confidence}
                   </span>
                 </div>
 
-                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{role.reason}</p>
+                <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{role.reason}</p>
 
                 {role.skillsToBuild.length > 0 ? (
                   <div className="mt-3">
-                    <div className="font-mono-ui text-[8px] uppercase tracking-[.14em] text-muted-foreground">
+                    <div className="font-mono-ui text-[9px] uppercase tracking-[.14em] text-muted-foreground">
                       Skills to build
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {role.skillsToBuild.slice(0, 5).map((skill) => (
-                        <span key={skill} className="rounded border border-border px-1.5 py-0.5 text-[8px] text-muted-foreground">
+                        <span key={skill} className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground">
                           {skill}
                         </span>
                       ))}
@@ -130,12 +130,12 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
                 ) : null}
 
                 {role.firstStep ? (
-                  <p className="mt-3 rounded-lg bg-primary/5 px-2.5 py-2 text-[10px] leading-relaxed">
+                  <p className="mt-3 rounded-lg bg-primary/5 px-2.5 py-2 text-[11px] leading-relaxed">
                     <span className="font-semibold">This week: </span>{role.firstStep}
                   </p>
                 ) : null}
 
-                <p className="mt-auto border-t border-border pt-2 text-[8px] leading-relaxed text-muted-foreground">
+                <p className="mt-auto border-t border-border pt-2 text-[9px] leading-relaxed text-muted-foreground">
                   Check it yourself: {role.occupationSource}
                 </p>
                 {onBuildPathway ? (
@@ -143,7 +143,7 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
                     type="button"
                     onClick={() => onBuildPathway(role)}
                     disabled={pathwayLoading}
-                    className="focus-ring mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[9px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    className="focus-ring mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[10px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                     data-testid={`button-pathway-${role.title}`}
                   >
                     <Sparkles size={11} />
@@ -155,10 +155,10 @@ export function FutureRolesSection({ explored, exploredLoading, onBuildPathway, 
           </div>
 
           {explored?.note ? (
-            <p className="mt-3 text-[9px] leading-relaxed text-muted-foreground">{explored.note}</p>
+            <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">{explored.note}</p>
           ) : null}
 
-          <p className="mt-3 text-[9px] leading-relaxed text-muted-foreground">
+          <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
             No salary, growth figure or course link is shown for these occupations, because we could not
             source one. The study plan in checkpoint 04 is built only from courses we have verified.
           </p>
