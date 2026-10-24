@@ -26,7 +26,7 @@ study plan built around the hours they actually have.
 | **GitHub Repository** | https://github.com/adamnaemman/sdc-hackathon |
 | **Replit Project** | https://replit.com/@adamnaeman/AURA-Workforce |
 | **Live demo** | https://aura-workforce.replit.app/ |
-| **Pitch video** | _paste the YouTube link here_ |
+| **Pitch video** | https://youtu.be/RfCrn-jAr0Q |
 | **PRD** | [`docs/SDC2026_overinfinity_Preliminary.pdf`](docs/SDC2026_overinfinity_Preliminary.pdf) |
 | **Technical & Tools Declaration** | [`docs/SDC2026_overinfinity_TechDeclaration.pdf`](docs/SDC2026_overinfinity_TechDeclaration.pdf) |
 | **Slide deck** | [`docs/PITCH DECK OVERINFINITY.pdf`](docs/AURA-Workforce-Deck.pdf), Canva link - https://canva.link/roz4g9e4dydd4gr |
