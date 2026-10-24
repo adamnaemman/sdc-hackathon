@@ -11,7 +11,7 @@ Everything below is ready except the video. Submit at **sdchack.my** before **25
 | 3 | Pitch deck | `docs/AURA-Workforce-Deck.pdf` (12 slides, 16:9) | ✅ rebuilt |
 | 4 | Live prototype | https://aura-workforce.replit.app/ | ✅ deployed |
 | 5 | GitHub repository | https://github.com/adamnaemman/sdc-hackathon | ✅ |
-| 6 | Pitching video (5–7 min, YouTube) | — | ⬜ record + upload |
+| 6 | Pitching video (5–7 min, YouTube) | link in the form | ✅ recorded |
 
 > Video over 7:00 costs **1 point per 30 seconds**. Aim for 6:30.
 
@@ -78,3 +78,30 @@ Built with React, Express, DeepSeek, O*NET and Arbeitnow data. No personal data 
 - [ ] Video is ≤ 7:00 and the YouTube link opens without login
 - [ ] All three PDFs uploaded, filenames unchanged
 - [ ] **No commits after the deadline** — repository freeze applies
+
+---
+
+## Verified state (25 Oct, 03:35 MYT)
+
+| Check | Result |
+|---|---|
+| `pnpm install` | clean, 9 workspace projects |
+| `pnpm run build` | typecheck green for api-server, aura-workforce, scripts; vite build 451 kB |
+| `node tests/smoke.mjs` | `all checks passed` (health, roles, signals, trends, library) |
+| Live API | https://aura-workforce.replit.app/api/healthz → 200 |
+
+## Form answers, ready to paste
+
+**Project name** — AURA-Workforce
+**Domain** — Domain 1, The Aiversecity Future-Ready Workforce Domain
+**SDG track** — 4.4 (primary), 4.3, 8.5, 8.2
+**Team** — overinfinity (Ahmad Adam Hakimi bin Naeman, IIUM)
+**Live prototype** — https://aura-workforce.replit.app/
+**Repository** — https://github.com/adamnaemman/sdc-hackathon
+**Video** — _(paste the YouTube link)_ ✅ recorded
+**PRD** — `SDC2026_overinfinity_Preliminary.pdf`
+**Technical & Tools Declaration** — `SDC2026_overinfinity_TechDeclaration.pdf`
+**Deck** — `AURA-Workforce-Deck.pdf` (12 slides)
+
+Short description: see the block above ("AURA-Workforce is a privacy-first
+career-transition planner…"). It is 120 words.

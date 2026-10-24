@@ -1,165 +1,168 @@
 # AURA-Workforce
 
-**A privacy-first career-transition planner for the AI era.** A worker describes their job, skills and
-available hours; AURA returns the roles that fit, the gap between today and tomorrow, and a sequenced
-learning pathway where every claim carries a source and a date.
-
-Live prototype: **https://aura-workforce.replit.app/**
-Built for **SDC Hackathon 2026 — Domain 1: The Aiversecity Future-Ready Workforce Domain**
+A privacy-first career-transition planner: four checkpoints from the market
+evidence, through a person's profile, to the roles an AI concludes fit them, and a
+study plan built around the hours they actually have.
 
 ---
 
-## The problem
+## Team
 
-Malaysia's training system cannot keep up with how fast AI changes jobs.
+| | |
+|---|---|
+| **Team name** | overinfinity |
+| **Members** | Ahmad Adam Hakimi bin Naeman — International Islamic University Malaysia (IIUM) |
+| **Domain** | Domain 1 — The Aiversecity Future-Ready Workforce Domain |
+| **SDG track** | 4.4 (primary), 4.3, 8.5, 8.2 |
 
-- **56%** of Malaysian professionals already use AI at work, but only **26%** have received formal training
-  (Hays Asia Salary Guide 2025).
-- The Ministry of Science, Technology and Innovation estimates **more than 600,000 workers** will need
-  reskilling within three to five years.
+## Links
 
-The people affected are specific: a procurement assistant whose routine work is being automated, a fresh
-graduate choosing a first role, an HR manager planning next year's training budget, a TVET counsellor
-advising students from a printed list.
+| | |
+|---|---|
+| **Live demo** | https://aura-workforce.replit.app/ |
+| **Pitch video** | _paste the YouTube link here_ |
+| **Repository** | https://github.com/adamnaemman/sdc-hackathon |
+| **PRD** | [`docs/SDC2026_overinfinity_Preliminary.pdf`](docs/SDC2026_overinfinity_Preliminary.pdf) |
+| **Technical & Tools Declaration** | [`docs/SDC2026_overinfinity_TechDeclaration.pdf`](docs/SDC2026_overinfinity_TechDeclaration.pdf) |
+| **Pitch deck** | [`docs/AURA-Workforce-Deck.pdf`](docs/AURA-Workforce-Deck.pdf) |
 
-What they lack is not information — it is **trustworthy direction**. Career advice today is generic,
-static and rarely sourced. A worker cannot see which roles are rising, cannot tell which of their
-existing skills transfer, cannot judge whether a pathway fits the hours they actually have, and has no
-way to check where a claim came from.
+## How to run the project
+
+Requires **Node 20+** and **pnpm 9+**.
+
+```bash
+# 1. install
+pnpm install
+
+# 2. environment
+cp .env.example .env        # then add your DeepSeek key: DEEPSEEK_API_KEY=sk-...
+
+# 3. API on :8080
+PORT=8080 pnpm --filter @workspace/api-server run dev
+
+# 4. web on :5173 (second terminal)
+pnpm --filter @workspace/aura-workforce run dev
+```
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `DEEPSEEK_API_KEY` | for the AI features | every model call. Without it those features degrade to fallbacks instead of failing |
+| `PORT` | no (default 8080) | API port |
+| `BASE_PATH` | no (default `/`) | Vite base path |
+
+Checks:
+
+```bash
+pnpm run build          # typecheck every package, then build api + web
+node tests/smoke.mjs    # against localhost:8080, or API_URL=... node tests/smoke.mjs
+```
+
+## Project structure
+
+```
+artifacts/
+  api-server/          Express API
+    src/routes/        one file per endpoint group
+    src/lib/           AI calls, trend maths, validation, logger
+    src/data/          occupation library (916 occupations)
+  aura-workforce/      React client (Vite)
+    src/App.tsx        the four checkpoints and all client state
+    src/components/    hero, avatar, checkpoint sections, chat, about, feedback
+    src/lib/           i18n, settings, scoring, live trends, translations
+lib/
+  api-spec/            OpenAPI contract — both sides are generated from it
+  api-zod/             Zod schemas shared by server and client
+  api-client-react/    Orval-generated client (do not edit by hand)
+  db/                  Drizzle config; unused at runtime, there is no database
+docs/                  PRD, declaration, deck (PDF) + editable sources
+submission/            the three PDFs the submission template asks for
+tests/                 smoke test against a running API
+scripts/               Python/Node tooling that generated the documents and assets
+```
+
+## How we used Replit & RunPod
+
+**Replit** is where the product runs. The monorepo is a pnpm workspace; the API and
+the web client are two Replit artifacts, and the deployment is an autoscaled Replit
+app served at `aura-workforce.replit.app`. Replit **Secrets** hold
+`DEEPSEEK_API_KEY`, so no credential is ever committed, and the Replit shell is how
+we sync the workspace to GitHub (`git fetch && git reset --hard origin/adam`, see
+`scripts/repl-sync.sh` — the Repl is a mirror, never the source of truth).
+
+**RunPod** is reserved for Phase 2. We registered the team account and kept the
+**USD 20 credit** for a self-hosted model: the planner speaks the OpenAI-compatible
+chat-completions protocol, so moving from the hosted DeepSeek endpoint to a model on
+a RunPod GPU is a base-URL change, not a rewrite. Nothing in the current build calls
+RunPod, and we say so rather than implying otherwise.
 
 ---
 
 ## What it does
 
-| | Feature | How it works |
+One page, four checkpoints:
+
+1. **Market signals** — 300 recent public postings, refreshed on demand. The most
+   requested skills are plotted week by week, with the source, fetch time and sample
+   size printed on the chart. Six sourced labour-market signals (BLS, WEF) sit below
+   it, each with its own source note.
+2. **Profile preferences** — role, industry, years of experience, available hours.
+   One model call expands them into concrete, selectable skills. Tools are pre-ticked
+   because they are factual; judgement skills stay unticked.
+3. **Future roles** — the model proposes occupations from that profile, including
+   ones outside our catalogue. Each comes with reasoning, skills to build, a first
+   step, and an O\*NET-SOC or MASCO reference a reader can check. No salary or course
+   is claimed that we could not source.
+4. **Learning path** — the model may only choose courses from a library we verified
+   link by link. Every step shows provider, hours and the reason for its order, and
+   the plan is divided by the weekly hours the person entered. If nothing fits, it
+   returns study topics with real search links instead of an invented course. Export
+   to PDF with a QR code per step.
+
+## The problem it answers
+
+56% of Malaysian professionals already use AI at work, but only 26% have had formal
+training (Hays Asia Salary Guide 2025), and MOSTI projects 600,000+ workers needing
+reskilling within three to five years. What those workers lack is not information —
+it is trustworthy direction. Career advice today is generic, static and rarely
+sourced, and the training they are told to buy is expensive and often already out of
+date.
+
+## What the AI may not do
+
+- **Closed vocabulary.** Every role and module identifier the model returns is
+  validated against the catalogue server-side; unknown identifiers are discarded.
+- **Visible disagreement.** The model's fit score sits next to a deterministic
+  estimate, so the two can be compared rather than blended.
+- **No storage.** No account, no database, no CV. The profile lives in the browser
+  tab. The only thing the server writes is anonymous feedback, and that file is
+  git-ignored.
+- **Injection treated as data.** Free text is delimited, output is schema-validated,
+  and the model never receives a tool that can write.
+
+## Stack
+
+React 19 · Vite · Tailwind CSS 4 · TanStack Query · Wouter · Express 5 · Zod ·
+OpenAPI with Orval · TypeScript · pnpm workspaces · Replit hosting ·
+DeepSeek `deepseek-chat` · O\*NET 30.1 · Arbeitnow job board API.
+
+## Data and attribution
+
+| Source | Use | Licence |
 |---|---|---|
-| 1 | **Skills profile intake** | A guided four-step form. On "Save & continue" the role, industry and years of experience are sent to DeepSeek, which returns the concrete skills and competencies for that job — pre-selected and fully editable. If the model is unavailable, the user simply picks them by hand. |
-| 2 | **Live AI-trend signal layer** | 300 recent public job postings are fetched from the Arbeitnow API, tokenised, and counted against each role's required skills. Every number carries its source, fetch time, window and sample size. |
-| 3 | **Future-role matching** | A deterministic, inspectable score: skills overlap, transferable skills, sector match, experience, disruption exposure and live demand. The breakdown is visible, not hidden. |
-| 4 | **Personalised reskilling pathway** | Ordered steps with prerequisites respected, hours estimated, free/low-cost providers linked, and a reason for each step's position. |
-| 5 | **SDG mapping** | Every role and learning step is tagged to UN SDG targets (4.4, 4.3, 8.2, 8.5, 3.8, 9.5, 12.6, 13.3). |
-| 6 | **Handling uncertainty** | Two scenarios — Moderate (4-year runway) and Aggressive (18-month runway) — change planning urgency instead of pretending to predict the future. |
+| O\*NET 30.1 (U.S. Department of Labor) | occupation library, role skills | CC BY 4.0 |
+| Arbeitnow job board API | live postings for the trend layer | public endpoint, no key |
+| U.S. Bureau of Labor Statistics, OOH | employment projections | public domain |
+| WEF, Future of Jobs 2025 | skills-change context | quoted with attribution |
 
----
+## Limitations
 
-## How the AI is used (and what it is not allowed to do)
+- The trend layer measures a **global** feed, not Malaysian vacancy counts. The
+  interface says so; Phase 2 adds a local source.
+- Skill matching is lexical, not semantic — the weakest part of the engine.
+- Five curated roles cannot cover every occupation; checkpoint 03 makes that limit
+  visible instead of hidden.
+- Fit scores are directional, not predictions about a person.
 
-Two endpoints, both server-side, both grounded:
+## License
 
-```
-POST /api/extract   free text ──► { role, years, skills[], competencies[] }
-POST /api/plan      whole profile + catalogue ──► { recommended role, ranking, ordered pathway }
-```
-
-The rules the system enforces, not just asks for:
-
-- **The model may only choose from the catalogue** (5 roles, 20 learning steps). Every `roleId` and
-  `moduleId` it returns is validated server-side; anything unknown is discarded.
-- **It cannot invent a course, provider, URL or statistic.** Course links come from the catalogue; the
-  model never writes one.
-- **Its fit score is shown next to the deterministic estimate** (`AI 72 · app estimate 58`), so a
-  disagreement is visible instead of hidden.
-- **Prompt injection is treated as data.** The user's text is delimited and the output is schema-validated;
-  an instruction inside a profile can at most pick a few allowed skills.
-
-Model: `deepseek-chat`. Declared in the Technical & Tools Declaration, as required.
-
----
-
-## Architecture
-
-```
-Browser (React SPA)
-   │  same origin, no CORS, no tokens in localStorage
-   ▼
-/api  (Express 5)
-   ├── /workforce/roles      curated catalogue: 5 roles + 20 learning steps
-   ├── /workforce/signals    6 sourced market signals (BLS, WEF) with geography + period
-   ├── /trends               live job postings → demand share, stamped source + date
-   ├── /extract              free text → structured profile        (DeepSeek)
-   └── /plan                 profile + catalogue → grounded plan   (DeepSeek)
-```
-
-Deployed on Replit as a web service (`/`) and an API service (`/api`). Secrets live in Replit Secrets —
-never in the repository.
-
----
-
-## Tech stack
-
-React 19 · Vite 7 · Tailwind CSS 4 · Radix UI · TanStack Query · Wouter · Express 5 · Zod ·
-OpenAPI 3.1 with Orval codegen · TypeScript 5.9 · pnpm workspaces · Node 24 · Replit (hosting) ·
-DeepSeek (language model) · Arbeitnow (public job data).
-
----
-
-## Running it
-
-The project targets Replit (Linux). Quick start inside the Replit Shell:
-
-```bash
-pnpm install
-PORT=8080 pnpm --filter @workspace/api-server run dev        # API on :8080
-PORT=20531 BASE_PATH=/ pnpm --filter @workspace/aura-workforce run dev   # web on :20531
-```
-
-Check the API:
-
-```bash
-curl -s localhost:8080/api/healthz
-curl -s localhost:8080/api/trends | head -c 200
-node scripts/test-plan.mjs        # full AI plan round-trip
-```
-
-Required secrets: `DEEPSEEK_API_KEY`. Without it, `/api/extract` and `/api/plan` return `503` and the
-rest of the app keeps working — the deterministic results never depend on the model.
-
-> **Windows note:** the workspace intentionally installs only Linux binaries
-> (`pnpm-workspace.yaml` overrides), so `pnpm install` on Windows will fail. Use Replit or WSL.
-
----
-
-## Data, privacy and honesty
-
-- **No accounts, no database, no CV upload.** A profile lives in browser memory and disappears when the
-  tab closes.
-- **Two things leave the browser, only on a button press:** a free-text description (forwarded to
-  DeepSeek, not logged, not stored) and the structured profile summary sent with the plan request.
-  Neither contains a name or contact detail.
-- **All demo profiles are synthetic**, as the domain rules require.
-- **Every market figure is a dated snapshot**, never described as live or Malaysia-specific unless it is.
-  The trend layer measures the *direction* of skill demand in a global, tech-oriented board — the UI says
-  so, and shows the sample size.
-
----
-
-## Known limitations
-
-1. **Five roles cannot serve every occupation.** The catalogue is a curated sample; when no role is a
-   strong match the plan should say so rather than force a recommendation.
-2. **The live feed is not Malaysian.** It signals direction, not local vacancy counts. Adding a Malaysian
-   source is the first Phase 2 item.
-3. **Skill matching is lexical**, not semantic: a hand-written alias table plus substring matching. It can
-   produce false positives; embeddings are the planned fix.
-4. **The sample is one page of postings** (300) refreshed at most every six hours.
-5. **Single AI provider.** The client is OpenAI-compatible, so a fallback endpoint is a configuration
-   change.
-
----
-
-## Phase 2
-
-A Malaysian trend source (DOSM / JobStreet-class postings) · semantic skill matching with embeddings ·
-a counsellor view with cohort-level gaps · saved plans with explicit consent and one-click deletion ·
-multi-language (English / Bahasa Malaysia / Chinese) · self-hosted model on RunPod GPU.
-
----
-
-## Team — overinfinity
-
-Ahmad Adam Hakimi bin Naeman · International Islamic University Malaysia (IIUM)
-
-**Declaration:** the interface shell, the original three-role catalogue and the OpenAPI scaffolding
-pre-date the hacking period and are declared in the submission's PRD (§6.1). Everything AI-related, the
-live trend layer, the two additional roles and this documentation were built during Phase 1
-(19–25 October 2026).
+Apache-2.0 — see [`LICENSE`](LICENSE).

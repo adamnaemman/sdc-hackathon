@@ -1,30 +1,32 @@
-# submission/
+﻿# submission/
 
-Everything a judge needs, in the order they usually open it.
+This folder mirrors the official template: **three PDFs, nothing else.**
 
-| File | What it is |
+| File | Where it comes from |
 |---|---|
-| `AURA-Workforce-Deck.pdf` | 12-slide pitch deck (16:9) |
-| `AURA-Workforce-Deck.pptx` | the same deck, editable |
-| `source-code.zip` | the complete source tree, zipped for convenience |
-| `video.md` | walkthrough video link, once uploaded |
+| `REPLIT PROOF OF USE.pdf` | your own screenshots of the Replit deployment + Core plan usage |
+| `RUNPOD PROOF OF USE.pdf` | your own screenshot of the RunPod credit (USD 20 team credit) |
+| `Submission Template SDC Hackathon.pdf` | downloaded from the official template repo, filled in, exported to PDF |
 
-The written deliverables live one level up in `../docs/`:
+Everything else lives outside this folder:
 
-- `SDC2026_overinfinity_Preliminary.pdf` — Product Requirement Document
-- `SDC2026_overinfinity_TechDeclaration.pdf` — Technical & Tools Declaration
+- `../docs/` - PRD, Technical & Tools Declaration, pitch deck
+- `../src/` - the product code
+- `../tests/` - the smoke test
 
-## Live prototype
+## How to make the two proof PDFs
 
-https://aura-workforce.replit.app/
+1. Open the relevant page (Replit: your Repl's Deployments/Usage; RunPod: Billing -> Credits).
+2. Capture the whole window (Win + Shift + S), making sure the account name or
+   project name, the date and the credit amount are all visible.
+3. Paste into Word or Google Docs, one screenshot per page, add a caption:
+   *"Replit Core - AURA-Workforce deployment, 25 Oct 2026"*.
+4. Export as PDF and save with the exact filename above.
 
-Open it in a private window. The four checkpoints are on one page; checkpoint 03
-and 04 need a click on **Apply** and then **Build verified pathway**, because they
-call the model.
+Judges read these to confirm the sponsor credits were used, so the amount and the
+account must be legible. Blur anything personal that is not needed.
 
-## Video
+## The video link
 
-Paste the YouTube link into `video.md` before submitting. Unlisted is fine; the
-form only needs it to open without a login.
-
-Target length: 6 minutes 30. Anything over 7:00 costs a point per 30 seconds.
+It goes in the submission form, not in this folder. Keep a copy in the form's
+notes field if there is one.

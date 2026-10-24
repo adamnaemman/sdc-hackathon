@@ -39,7 +39,7 @@ MUTED = (91, 107, 103)
 WHITE = (255, 255, 255)
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE.parent / "docs" / "ads4k"
+OUT = HERE.parent / "assets" / "ads4k"
 FRAMES = OUT / "frames"
 
 FONTS = Path(r"C:\Windows\Fonts")

@@ -6,9 +6,9 @@ correct for development but awkward to hand in or rebuild elsewhere. This script
 copies the code (not node_modules, not the unused mockup sandbox) into a flat
 layout under submission/src, keeps the config files needed to run it, and writes:
 
-    submission/README.md      structure, entry points, environment, how to run
-    submission/MANIFEST.txt   every file with its line count and origin
-    submission/ALL_CODE.md    every file concatenated, for reading offline
+    source-bundle/README.md    structure, entry points, environment, how to run
+    source-bundle/MANIFEST.txt every file with its line count and origin
+    source-bundle/ALL_CODE.md  every file concatenated, for reading offline
 
 The running app is untouched: this is a copy, so nothing here can break the demo.
 """
@@ -19,7 +19,7 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(r"D:\sdc-hackathon")
-OUT = ROOT / "submission"
+OUT = ROOT / "source-bundle"
 SRC = OUT / "src"
 CONFIG = OUT / "config"
 

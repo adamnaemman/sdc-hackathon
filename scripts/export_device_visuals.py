@@ -11,7 +11,7 @@ import importlib.util
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE.parent / "docs" / "deck-assets"
+OUT = HERE.parent / "assets" / "deck"
 OUT.mkdir(parents=True, exist_ok=True)
 
 

@@ -32,7 +32,7 @@ ACCENT = (217, 142, 119)
 MUTED = (91, 107, 103)
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE.parent / "docs" / "intro"
+OUT = HERE.parent / "assets" / "intro"
 FRAMES = OUT / "frames"
 
 FONT_DIR = Path(r"C:\Windows\Fonts")

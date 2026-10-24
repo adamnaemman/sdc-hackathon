@@ -19,7 +19,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 OUT = Path(__file__).resolve().parent.parent / "docs" / "AURA-Workforce-Deck.pptx"
-ASSETS = Path(__file__).resolve().parent.parent / "docs" / "deck-assets"
+ASSETS = Path(__file__).resolve().parent.parent / "assets" / "deck"
 
 INK = RGBColor(0x1F, 0x3A, 0x37)
 CREAM = RGBColor(0xF6, 0xF2, 0xEA)
